@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="CY">
+
+
+
+
+
+<title>pytorch | Hexo</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">CY&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">CY&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">pytorch</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">CY</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">April 25, 2022&nbsp;&nbsp;18:54:33</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/source-code/">source code</a>
+                            
+							
+							
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h1 id="Module类"><a href="#Module类" class="headerlink" title="Module类"></a>Module类</h1><ul>
+<li>module中的__getattr中有三个魔法函数，其有三个成员变量分别是<code>_parameters</code>、<code>_buffers</code>(统计量)和<code>_modules</code></li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 实例化模型后，参数已初始化</span></span><br><span class="line">test_module = Net()</span><br><span class="line"><span class="comment"># 返回模型中各个子模块层,返回的是有序字典，与named_children()区别，其返回的是元组</span></span><br><span class="line">test_module._modules</span><br><span class="line"><span class="comment"># 打印模块自身的Parameters、buff对象，不包括其中各个子模块</span></span><br><span class="line">test_module._parameters</span><br><span class="line">test_module._buffers</span><br><span class="line"></span><br><span class="line"><span class="comment"># named_modules()不仅返回自身模块还返回各个子模块 </span></span><br><span class="line"><span class="keyword">for</span> p <span class="keyword">in</span> test_module.named_modules():</span><br><span class="line">    <span class="built_in">print</span>(p)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>module中的<code>state_dict</code>方法<ol>
+<li>首先，通过<code>_save_to_state_dict</code>方法先将当前模块的<code>parameters</code>和<code>buffers</code>变量存入<code>destination</code>字典</li>
+<li>然后，遍历<code>self.modules.items()</code>子模块，将每个子模块的<code>parameters</code>和<code>buffers</code>变量存入<code>destination</code>字典</li>
+<li>最后返回<code>destination</code>字典中包含所有模型状态参数，OrderedDict[key, value]</li>
+</ol>
+</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>module.state_dict().keys()</span><br><span class="line">[<span class="string">&#x27;bias&#x27;</span>, <span class="string">&#x27;weight&#x27;</span>]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 将网络参数保存到path文件中，不包含网络图结构和优化器参数等部分</span></span><br><span class="line">torch.save(test_module.state_dict(), path)</span><br><span class="line"></span><br><span class="line"><span class="comment">#———————————————————————————模型保存相关—————————————————————</span></span><br><span class="line"><span class="comment"># 保存网络参数和图结构，占用磁盘空间大</span></span><br><span class="line">torch.save(test_module, path)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 保存所有所有相关信息</span></span><br><span class="line">EPOCH = <span class="number">5</span></span><br><span class="line">PATH = <span class="string">&quot;model.pt&quot;</span></span><br><span class="line">LOSS = <span class="number">0.4</span></span><br><span class="line"></span><br><span class="line">torch.save(&#123;</span><br><span class="line">            <span class="string">&#x27;epoch&#x27;</span>: EPOCH,</span><br><span class="line">            <span class="string">&#x27;model_state_dict&#x27;</span>: net.state_dict(),</span><br><span class="line">            <span class="string">&#x27;optimizer_state_dict&#x27;</span>: optimizer.state_dict(),</span><br><span class="line">            <span class="string">&#x27;loss&#x27;</span>: LOSS,</span><br><span class="line">            &#125;, PATH)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 再次实例化，是因为上面torch.save中没有保存网络图结构，要先构建图结构再去加载参数</span></span><br><span class="line">model = Net()</span><br><span class="line">optimizer = optim.SGD(net.parameters(), lr=<span class="number">0.001</span>, momentum=<span class="number">0.9</span>)</span><br><span class="line"></span><br><span class="line">checkpoint = torch.load(PATH)</span><br><span class="line"><span class="comment"># 传入字典对象</span></span><br><span class="line">model.load_state_dict(checkpoint[<span class="string">&#x27;model_state_dict&#x27;</span>])</span><br><span class="line">optimizer.load_state_dict(checkpoint[<span class="string">&#x27;optimizer_state_dict&#x27;</span>])</span><br><span class="line">epoch = checkpoint[<span class="string">&#x27;epoch&#x27;</span>]</span><br><span class="line">loss = checkpoint[<span class="string">&#x27;loss&#x27;</span>]</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>module中的<code>parameter</code>方法</p>
+<ol>
+<li>注意<code>parameter</code> 与<code>_parameters </code>区分，前者返回的是迭代器，包括当前模块和各个子模块的参数。后者返回的是当前模块中的参数。</li>
+<li>其中会执行<code>named_papameters</code> 最终返回的是个迭代器对象[key, value]</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">for</span> p <span class="keyword">in</span> test_module.named_parameters():</span><br><span class="line">    	<span class="built_in">print</span>(p)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>module中的<code>train</code> 方法</p>
+<p><code>dropout</code> 和 <code>batchnorm</code> 都继承了Module类，都属于模型的子模块，当把模型设置为训练模式和验证模式时，相应的子模块也会设为对应的训练或验证模式</p>
+</li>
+</ul>
+<h1 id="自动微分Forward与Reverse模式"><a href="#自动微分Forward与Reverse模式" class="headerlink" title="自动微分Forward与Reverse模式"></a>自动微分Forward与Reverse模式</h1><ul>
+<li><h2 id="Forward计算流程"><a href="#Forward计算流程" class="headerlink" title="Forward计算流程"></a>Forward计算流程</h2></li>
+</ul>
+<p><img src="/2022/04/25/pytorch/image-20220426135242639.png" alt="forward"></p>
+<p><strong>&#x3D;&#x3D;特点&#x3D;&#x3D;：</strong>前向计算过程中当前节点相对某个输入结点的梯度可计算得到；每次只能得到一个输入节点的导数如图中的x1</p>
+<ul>
+<li><h2 id="Reverse计算流程"><a href="#Reverse计算流程" class="headerlink" title="Reverse计算流程"></a>Reverse计算流程</h2></li>
+</ul>
+<p><img src="/2022/04/25/pytorch/image-20220426135907575.png" alt="reverse"></p>
+<p><strong>&#x3D;&#x3D;特点：&#x3D;&#x3D;</strong> 反向计算过程中需要等待前向计算结束；一次性可以算出所有节点导数 </p>
+<blockquote>
+<p>图片出处：Automatic Differentiation in Machine Learning: a Survey</p>
+</blockquote>
+<h1 id="算子融合"><a href="#算子融合" class="headerlink" title="算子融合"></a>算子融合</h1><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"><span class="keyword">import</span> torch.nn.functional <span class="keyword">as</span> F</span><br><span class="line"></span><br><span class="line">in_channels = <span class="number">2</span></span><br><span class="line">out_channels =<span class="number">2</span></span><br><span class="line">kernel_size = <span class="number">3</span></span><br><span class="line">w = <span class="number">9</span></span><br><span class="line">h = <span class="number">9</span></span><br><span class="line"></span><br><span class="line">x = torch.ones(<span class="number">1</span>, in_channels, h, w)</span><br><span class="line">conv3 = nn.Conv2d(in_channels, out_channels, kernel_size, padding=<span class="string">&quot;same&quot;</span>)</span><br><span class="line">conv1 = nn.Conv2d(in_channels, out_channels, <span class="number">1</span>)    <span class="comment"># [2,2,1,1]</span></span><br><span class="line">result1 = x + conv3(x) + conv1(x)</span><br><span class="line"><span class="built_in">print</span>(result1)</span><br><span class="line"></span><br><span class="line"><span class="comment"># ——————————————————————--————将1*1卷积转为3*3——————————————————————————————————————</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># pad填充方式从里到外，每个维度都有上下和左右两个方向，四个1分别对应上下左右填充0的个数</span></span><br><span class="line"><span class="comment"># [2,2,1,1] -&gt; [2,2,3,3]</span></span><br><span class="line">conv1_to_conv3 = F.pad(conv1.weight, [<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>]) </span><br><span class="line"></span><br><span class="line"><span class="comment"># 实例化卷积</span></span><br><span class="line">conv1_3 = nn.Conv2d(in_channels, out_channels, kernel_size, padding=<span class="string">&quot;same&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 将卷积参数用1*1填充后的参数替代，weight是parameter类，要用nn.Parameter()包装</span></span><br><span class="line">conv1_3.weight = nn.Parameter(conv1_to_conv3)</span><br><span class="line">conv1_3.bias = conv1.bias</span><br><span class="line"></span><br><span class="line"><span class="comment">#--------------------------------如何将输入图化为3*3卷积表示—————————————————————————————————</span></span><br><span class="line"><span class="comment">#------------------------1. 必须是1*1的卷积不考虑相邻点融合--------------—————————————————————</span></span><br><span class="line"><span class="comment">#-------------------—2. 不考虑通道间的融合（只有一个通道中含有非0数）----------------------------</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># zeros:不考虑通道之间影响	channel:不考虑相邻点影响  	weight[2,2,3,3]：共四个3*3矩阵</span></span><br><span class="line">zeros = torch.unsqueeze(torch.zeros(kernel_size, kernel_size), <span class="number">0</span>)</span><br><span class="line">channels = torch.unsqueeze(F.pad(torch.ones(<span class="number">1</span>, <span class="number">1</span>), [<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>]), <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 第一个输出通道卷积核</span></span><br><span class="line">channel_zeros = torch.unsqueeze(torch.cat([channels, zeros], <span class="number">0</span>), <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 第二个输出通道卷积核</span></span><br><span class="line">zeros_ channel= torch.unsqueeze(torch.cat([zeros, channels], <span class="number">0</span>), <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">identity_conv_weight = torch.cat([channel_zeros, zeros_ channel], <span class="number">0</span>)</span><br><span class="line">identity_conv_bias = torch.zeros([out_channels])</span><br><span class="line"></span><br><span class="line">convx_3 = nn.Conv2d(in_channels, out_channels, kernel_size, padding=<span class="string">&quot;same&quot;</span>)</span><br><span class="line">convx_3.weight = nn.Parameter(identity_conv_weight)</span><br><span class="line">convx_3.bias = nn.Parameter(identity_conv_bias)</span><br><span class="line"></span><br><span class="line">result2 = conv3(x) + conv1_3 + convx_3</span><br><span class="line"><span class="built_in">print</span>(result2)</span><br></pre></td></tr></table></figure>
+
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>CY</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>Permalink:</span>
+                        <span><a href="http://example.com/2022/04/25/pytorch/">http://example.com/2022/04/25/pytorch/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>Do you believe in <strong>DESTINY</strong>?</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/torch/"># torch</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+            
+            <a class="next" rel="next" href="/2022/03/30/convnext/">convnext</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© CY | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"log":false,"model":{"jsonPath":"/live2dw/assets/haruto.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":false},"react":{"opacity":0.7}});</script></body>
+<script>
+!
+function() {
+    function n(n, e, t) {
+        return n.getAttribute(e) || t
+    }
+    function e(n) {
+        return document.getElementsByTagName(n)
+    }
+    function t() {
+        var t = e("script"),
+        o = t.length,
+        i = t[o - 1];
+        return {
+            l: o,
+            z: n(i, "zIndex", -1),     //置于主页面背后
+            o: n(i, "opacity", .5),     //线条透明度
+            c: n(i, "color", "0,0,0"),  //线条颜色
+            n: n(i, "count", 100)    //线条数量
+        }
+    }
+    function o() {
+        a = m.width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth,
+        c = m.height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
+    }
+    function i() {
+        r.clearRect(0, 0, a, c);
+        var n, e, t, o, m, l;
+        s.forEach(function(i, x) {
+            for (i.x += i.xa, i.y += i.ya, i.xa *= i.x > a || i.x < 0 ? -1 : 1, i.ya *= i.y > c || i.y < 0 ? -1 : 1, r.fillRect(i.x - .5, i.y - .5, 1, 1), e = x + 1; e < u.length; e++) n = u[e],
+            null !== n.x && null !== n.y && (o = i.x - n.x, m = i.y - n.y, l = o * o + m * m, l < n.max && (n === y && l >= n.max / 2 && (i.x -= .03 * o, i.y -= .03 * m), t = (n.max - l) / n.max, r.beginPath(), r.lineWidth = t / 2, r.strokeStyle = "rgba(" + d.c + "," + (t + .2) + ")", r.moveTo(i.x, i.y), r.lineTo(n.x, n.y), r.stroke()))
+        }),
+        x(i)
+    }
+    var a, c, u, m = document.createElement("canvas"),
+    d = t(),
+    l = "c_n" + d.l,
+    r = m.getContext("2d"),
+    x = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
+    function(n) {
+        window.setTimeout(n, 1e3 / 45)
+    },
+    w = Math.random,
+    y = {
+        x: null,
+        y: null,
+        max: 2e4
+    };
+    m.id = l,
+    m.style.cssText = "position:fixed;top:0;left:0;z-index:" + d.z + ";opacity:" + d.o,
+    e("body")[0].appendChild(m),
+    o(),
+    window.onresize = o,
+    window.onmousemove = function(n) {
+        n = n || window.event,
+        y.x = n.clientX,
+        y.y = n.clientY
+    },
+    window.onmouseout = function() {
+        y.x = null,
+        y.y = null
+    };
+    for (var s = [], f = 0; d.n > f; f++) {
+        var h = w() * a,
+        g = w() * c,
+        v = 2 * w() - 1,
+        p = 2 * w() - 1;
+        s.push({
+            x: h,
+            y: g,
+            xa: v,
+            ya: p,
+            max: 6e3
+        })
+    }
+    u = s.concat([y]),
+    setTimeout(function() {
+        i()
+    },
+    100)
+} ();
+</script>
+
+<script type='text/javascript' id='clustrmaps' src='//cdn.clustrmaps.com/map_v2.js?cl=ffffff&w=350&t=m&d=1NqKKNlM62oDkLYA7mQMmVg49mUH_Ib-6MkRgvd04o8&co=2d78ad&cmo=ffc253&cmn=ff5353&ct=ffffff'></script>
+
+</html>
