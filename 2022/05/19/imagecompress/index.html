@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="CY">
+
+
+
+
+
+<title>imagecompress | Hexo</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+    <link rel="stylesheet" href="/../fonts/iconfont2/iconfont.css">
+    
+    <link rel="stylesheet" href="/../fonts/iconfont3/iconfont.css">
+    
+    <link rel="stylesheet" href="/../fonts/iconfont4/iconfont.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+<meta name="generator" content="Hexo 6.1.0">
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">CY&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">📚Posts</a>
+                
+                    <a class="menu-item" href="/category">📁Categories</a>
+                
+                    <a class="menu-item" href="/tag">🏷️Tags</a>
+                
+                    <a class="menu-item" href="/about">📑About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">CY&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">📚Posts</a>
+                
+                    <a class="menu-item" href="/category">📁Categories</a>
+                
+                    <a class="menu-item" href="/tag">🏷️Tags</a>
+                
+                    <a class="menu-item" href="/about">📑About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">imagecompress</h1>
+            
+                <div class="post-meta">
+                    
+                        👨‍🎓Author: <a itemprop="author" rel="author" href="/">CY</a>
+                    
+
+                    
+                        <span class="post-time">
+                        📅Date: <a href="#">May 19, 2022&nbsp;&nbsp;15:24:18</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+							📚Category:
+                            
+                                <a href="/categories/course/">course</a>
+                            
+                        </span>
+                    
+					
+					
+						<span class="post-count">
+					📑Words:
+						<a href="">1.9k</a>
+						</span>
+					
+					
+						<span class="post-count">
+					⏱️Time:
+						<a href="">6min</a>  
+						</span>
+					
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h1 id="JPEG-不可思议的压缩率"><a href="#JPEG-不可思议的压缩率" class="headerlink" title="JPEG 不可思议的压缩率"></a>JPEG 不可思议的压缩率</h1><blockquote>
+<p>以JPEG图像压缩算法为例，讲述信号处理的核心思想和主题（还讲了颜色空间、<code>YCbCr</code>、色度子采样、离散余弦变换、量化和无损编码等细节。)</p>
+</blockquote>
+<h2 id="引子"><a href="#引子" class="headerlink" title="引子"></a>引子</h2><p><img src="/2022/05/19/imagecompress/image-20220519152830270.png" alt="image-20220519152830270"></p>
+<p><strong>核心问题：</strong>图片压缩过程中哪类信息可以去除，怎么去除</p>
+<p><img src="/2022/05/19/imagecompress/image-20220519153141089.png" alt="image-20220519153141089"></p>
+<p>科学家发现人眼对亮度更敏感对颜色没那么敏感——JPEG压缩方案考虑了这个特点——想要知道怎么做必须深入探索色彩空间领域</p>
+<div align="center">
+    <img src="/2022/05/19/imagecompress/colorspace.png" alt="colorspace" style="zoom:40%;">
+    <img src="/2022/05/19/imagecompress/color.png" alt="color" style="zoom:77%;">
+</div>
+
+<p>RGB色彩空间有个特点：如果沿着对角线走从原点走到（255，255，255），就能得到逐渐变亮的颜色，这些点构成的线定义了所有可能的灰阶颜色，这是衡量亮度最直接的方式。将亮度独立出来的想法是另一个色彩空间的基石<code>YCbCr</code> ,<code>Y</code>分量衡量的是图片的“流明”或亮度，<code>Cb</code>和<code>Cr</code>存储的是颜色信息。<code>Y</code>可以视为一个单独的纵轴，值越大表明亮度越大。JPEG使用的这种色彩空间的原因是让我们能直接调用最适合人眼识别的颜色</p>
+<div align="center">
+    <img src="/2022/05/19/imagecompress/1.png" alt="1" style="zoom:20%;">
+    <img src="/2022/05/19/imagecompress/2.png" alt="2" style="zoom:20%;">
+</div>
+
+<p>由于人对亮度敏感度高，其中一个压缩原图的思路就是缩减<code>Cb</code>和<code>Cr</code>分量的采样数，但把亮度分量全保留。这个技术被称为“色度下采样/色度抽样”。</p>
+<h2 id="色度下采样-x2F-色度抽样"><a href="#色度下采样-x2F-色度抽样" class="headerlink" title="色度下采样/色度抽样"></a>色度下采样/色度抽样</h2><div align="center">
+    <img src="/2022/05/19/imagecompress/3.png" alt="3" style="zoom:25%;">
+    <img src="/2022/05/19/imagecompress/4.png" alt="4" style="zoom:20%;">
+</div>
+
+<p><code>色度下采样</code>的具体操作是对原图种四个像素点求平均得到一个值；<code>色度抽样</code>通常选左上角像素值代表整个2×2区域的颜色，待色彩分量的采样数缩减后就可以和亮度分量合并如上右图所示。在这里色彩分量保持16个像素，这就得到了抽样后的图像。</p>
+<img src="/2022/05/19/imagecompress/image-20220519161938690.png" alt="image-20220519161938690">
+
+<p>至此距离JPEG 95%的压缩率仍有距离，需要考虑其他方面</p>
+<p><img src="/2022/05/19/imagecompress/image-20220519162214777.png" alt="image-20220519162214777"></p>
+<p>##Y</p>
+<p>下面的压缩环节我们关注<code>Y</code>通道,本节的核心原理同样可以用于色彩分量</p>
+<h3 id="DCT概述"><a href="#DCT概述" class="headerlink" title="DCT概述"></a>DCT概述</h3><p>我们需要以完全不同的视角来看待图片，有一个看待图片的角度是将图片视作“信号”</p>
+<p><img src="/2022/05/19/imagecompress/image-20220519162908961.png" alt="image-20220519162908961"></p>
+<p>取出图片中若干像素构成的一行，使我们得以讨论图片里的“频率分量”</p>
+<p><img src="/2022/05/19/imagecompress/image-20220519163136283.png" alt="image-20220519163136283"></p>
+<p><img src="/2022/05/19/imagecompress/image-20220519163255418.png" alt="image-20220519163255418"></p>
+<p>人类视觉系统通常对图片的高频细节不敏感，因此JPEG会有策略地去除图片中不太重要、较少见的高频信号，达到更大的压缩率。<strong>那么如何提取频率分量呢？</strong></p>
+<div align="center">
+    <img src="/2022/05/19/imagecompress/5.png" alt="5" style="zoom:64%;">
+    <img src="/2022/05/19/imagecompress/6.png" alt="6" style="zoom:36%;">
+</div>
+
+<p>先将这8个像素当成是某种信号，<code>DCT</code>将原始信号的<strong>样本点</strong>作为输入。</p>
+<p><img src="/2022/05/19/imagecompress/image-20220519165127117.png" alt="image-20220519165127117"></p>
+<p><img src="/2022/05/19/imagecompress/image-20220519165454818.png" alt="image-20220519165454818"></p>
+<p>用“系数”来描述<code>DCT</code>的输出,==<strong>这些系数描述了组成原始信号的不同频率余弦波的权重</strong>== 。本质是求出某个特定的余弦波应在信号里包含多少。</p>
+<p>可以把这个过程类比为将复杂的信号拆分成简单余弦波的加权求和，<strong>那么到底使用了哪些余弦波，波如何和图中的像素建立关联？</strong>以下取cos(x)为例</p>
+<div align="center">
+    <img src="/2022/05/19/imagecompress/7.png" alt="7" style="zoom:34%;">
+    <img src="/2022/05/19/imagecompress/8.png" alt="8" style="zoom:26%;">
+</div>
+
+<p>为了与之前的例子保持一致，我们需要在余弦波中采8个点做样本</p>
+<p><img src="/2022/05/19/imagecompress/9.png" alt="image-20220519165454818"></p>
+<p>输出表明对输入有贡献的余弦波只有一个，看似合理因为此时的输入本身就取自一个余弦波。**==改变余弦波的振幅==<strong>发现<code>DCT</code>系数<code>X1</code>同比变化，说明其实际担任了余弦曲线中权重的角色。</strong>那么如何将其与图像联系起来？**</p>
+<p><img src="/2022/05/19/imagecompress/image-20220519172027023.png" alt="image-20220519172027023"></p>
+<p><strong>构建余弦波到图像的映射：</strong>要让余弦波到图像的映射更合理可以把像素值平移128个单位<code>(0,255)-&gt;(-128,127)</code>此时，像素变化的大小和方向便反映到原始余弦波的振幅上即<code>DCT</code>的系数。</p>
+<p><img src="/2022/05/19/imagecompress/image-20220519172509224.png" alt="image-20220519172509224"></p>
+<p><strong>还有什么变动会影响DCT呢？</strong>比较简单的是单纯把波整体上下平移，**==看起来升降信号只影响系数X0==<strong>。当提高频率时，发现有多个不同的<code>DCT</code>系数与余弦波相对应，当变为<code>cos(2x)</code>后只有系数X2不为0，这个余弦波只是将之前哪个余弦波的频率翻倍了。频率为0的余弦波是一个常值信号提供了标准，去衡量</strong>一组像素的整体亮度**</p>
+<p><img src="/2022/05/19/imagecompress/image-20220519202319099.png" alt="image-20220519202319099"></p>
+<p>每个频率都对应一个不同的图像模式，<code>DCT</code>的核心是分解出各个基本模式，分析它们对原始图像的贡献，结果发现八个像素的所有可能组合都可表示为这八个余弦波的总和</p>
+<p><img src="/2022/05/19/imagecompress/image-20220519202612699.png" alt="image-20220519202612699"></p>
+<p><code>DCT</code>的数学定义如上，其中<code>k</code>为余弦波的频率，原始信号点可以表示为一个矢量，我们可以将余弦波的采样点也改写成矢量</p>
+<p><img src="/2022/05/19/imagecompress/image-20220519202933577.png" alt="image-20220519202933577"></p>
+<p>向量点积的形式是衡量两者相似性的好方法，这解释了当我们对频率为<code>k</code>的余弦波采样，将其输入<code>DCT</code>后位于<code>k</code>号位的系数为何会出现尖峰。这两个向量互为倍数，所以点积被最大化了</p>
+<p><img src="/2022/05/19/imagecompress/image-20220519204120404.png" alt="image-20220519204120404"></p>
+<p>我们可以把整个<code>DCT</code>看成是矩阵与向量之积，矩阵每行是各自频率的余弦波中的采样点，**==令人震惊的是矩阵中每行都是相互正交的==**，这就是为什么直接只输入一个特定频率的余弦波时，其他系数没有任何贡献（来自不同余弦波的采样点相互正交 ）</p>
+<h3 id="JPEG如何具体使用DCT"><a href="#JPEG如何具体使用DCT" class="headerlink" title="JPEG如何具体使用DCT"></a>JPEG如何具体使用DCT</h3><p><img src="/2022/05/19/imagecompress/image-20220519205438515.png" alt="image-20220519205438515"></p>
+<p>首先将图片分为多个8*8的区域，各个元素减去128使值域中心为0，再对这个矩阵的行列进行<code>DCT</code>变换，各系数分别代表某个8 * 8图案的权重，其他格子都是第一行和第一列这些基础图案的组合</p>
+<p><img src="/2022/05/19/imagecompress/image-20220519221457268.png" alt="image-20220519221457268"></p>
+<p>只加入小部分的频率，我们的信号和图像也和原图相差无几了</p>
+<p><img src="/2022/05/19/imagecompress/image-20220519221911043.png" alt="image-20220519221911043"></p>
+<p>最大系数在左上角也就是低频部分，有趣的是图里的各个8*8矩阵基本都满足这个性质，这个性质称为能量集中（图像压缩领域的重要概念）。进行变化后，其中最大的那些值会集中在几个低频系数上，复原图像时每个小块只用一部分的系数（<strong>最低频的分量</strong>）肉眼就很难分辨了，正是这个概念让我们在不降低观感的同时能够高度压缩图片。随着频率的提高，人对高频系数逐渐不敏感，就可以丢弃<code>DCT</code>的高频分量，如何做呢？</p>
+<h3 id="DCT如何丢弃高频分量"><a href="#DCT如何丢弃高频分量" class="headerlink" title="DCT如何丢弃高频分量"></a>DCT如何丢弃高频分量</h3><p><img src="/2022/05/19/imagecompress/image-20220520093829648.png" alt="image-20220520093829648"></p>
+<p>**==量化：==*<em>给定一个8</em>8矩阵代表<code>DCT</code>输出的频率系数，将每个元素分别除以一个标量值（有不同的量化表分别用于亮度通道和色彩通道），然后取整。</p>
+<p><img src="/2022/05/19/imagecompress/image-20220520094009730.png" alt="image-20220520094009730"></p>
+<p>解码阶段不太重要的高频分量会出现一大堆0，完成量化后，可以利用冗余来进一步压缩，这涉及到<code>游程编码和霍夫曼编码的组合</code>。</p>
+<p><img src="/2022/05/19/imagecompress/image-20220520095419761.png" alt="image-20220520095419761"></p>
+<p>编码将系数按之字形排列，让序列尽量多出现连续0，然后用游程编码压缩，霍夫曼编码较复杂此处省略具体操作。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>JPEG中的许多革新时源于人类视觉系统的实验和理解，这让我们知道人眼对色彩和高频信息并不敏感，音频视频压缩上也偶同样的技术应用。</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1iv4y1N7sq?spm_id_from=444.41.list.card_archive.click">https://www.bilibili.com/video/BV1iv4y1N7sq?spm_id_from=444.41.list.card_archive.click</a></p>
+</blockquote>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>CY</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>Permalink:</span>
+                        <span><a href="http://example.com/2022/05/19/imagecompress/">http://example.com/2022/05/19/imagecompress/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>Do you believe in <strong>DESTINY</strong>?</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/image-processing/"># image processing</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+            
+            <a class="next" rel="next" href="/2022/05/17/swin/">Swin</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+
+
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.min.js"></script>
+<div id="gitalk-container"></div>
+<script type="text/javascript">
+      var gitalk = new Gitalk({
+        clientID: '9810f94b2996825e7931',
+        clientSecret: 'c1aee8c436730130e3ad18694d20888a1ee13bce',
+        repo: 'Seperendity.github.io',
+        owner: 'Seperendity',
+        admin: 'Seperendity',
+        id: location.pathname,
+        labels: 'Gitalk'.split(',').filter(l => l),
+        perPage: 10,
+        pagerDirection: 'last',
+        createIssueManually: true,
+        distractionFreeMode: false
+      })
+      gitalk.render('gitalk-container')
+</script>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© CY | 2022 😉 Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a>
+		|
+		<!-- 访客数量 -->
+		
+		  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+<span class="site-uv">
+
+  <i class="iconfont icon-yonghu "></i>
+
+ <i class="busuanzi-value" id="busuanzi_value_site_uv"></i>
+
+</span>&nbsp;
+
+
+
+
+
+<span class="site-pv">
+
+ <i class="iconfont icon-jiaoyinzujifangke "></i>
+
+ <i class="busuanzi-value" id="busuanzi_value_site_pv"></i>
+
+</span>
+
+
+		
+		</span>
+    </div>
+</footer>
+
+<script>
+    $(document).ready(function () {
+
+        var int = setInterval(fixCount, 50);  // 50ms周期检测函数
+        var pvcountOffset = 80000;  // 初始化首次数据
+        var uvcountOffset = 20000;
+
+        function fixCount() {
+            if (document.getElementById("busuanzi_container_site_pv").style.display != "none") {
+                $("#busuanzi_value_site_pv").html(parseInt($("#busuanzi_value_site_pv").html()) + pvcountOffset);
+                clearInterval(int);
+            }
+            if ($("#busuanzi_container_site_pv").css("display") != "none") {
+                $("#busuanzi_value_site_uv").html(parseInt($("#busuanzi_value_site_uv").html()) + uvcountOffset); // 加上初始数据 
+                clearInterval(int); // 停止检测
+            }
+        }
+    });
+</script>
+
+    </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"log":false,"model":{"jsonPath":"/live2dw/assets/haruto.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":true},"react":{"opacity":0.7}});</script></body>
+<script>
+!
+function() {
+    function n(n, e, t) {
+        return n.getAttribute(e) || t
+    }
+    function e(n) {
+        return document.getElementsByTagName(n)
+    }
+    function t() {
+        var t = e("script"),
+        o = t.length,
+        i = t[o - 1];
+        return {
+            l: o,
+            z: n(i, "zIndex", -1),     //置于主页面背后
+            o: n(i, "opacity", .5),     //线条透明度
+            c: n(i, "color", "0,0,0"),  //线条颜色
+            n: n(i, "count", 100)    //线条数量
+        }
+    }
+    function o() {
+        a = m.width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth,
+        c = m.height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
+    }
+    function i() {
+        r.clearRect(0, 0, a, c);
+        var n, e, t, o, m, l;
+        s.forEach(function(i, x) {
+            for (i.x += i.xa, i.y += i.ya, i.xa *= i.x > a || i.x < 0 ? -1 : 1, i.ya *= i.y > c || i.y < 0 ? -1 : 1, r.fillRect(i.x - .5, i.y - .5, 1, 1), e = x + 1; e < u.length; e++) n = u[e],
+            null !== n.x && null !== n.y && (o = i.x - n.x, m = i.y - n.y, l = o * o + m * m, l < n.max && (n === y && l >= n.max / 2 && (i.x -= .03 * o, i.y -= .03 * m), t = (n.max - l) / n.max, r.beginPath(), r.lineWidth = t / 2, r.strokeStyle = "rgba(" + d.c + "," + (t + .2) + ")", r.moveTo(i.x, i.y), r.lineTo(n.x, n.y), r.stroke()))
+        }),
+        x(i)
+    }
+    var a, c, u, m = document.createElement("canvas"),
+    d = t(),
+    l = "c_n" + d.l,
+    r = m.getContext("2d"),
+    x = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
+    function(n) {
+        window.setTimeout(n, 1e3 / 45)
+    },
+    w = Math.random,
+    y = {
+        x: null,
+        y: null,
+        max: 2e4
+    };
+    m.id = l,
+    m.style.cssText = "position:fixed;top:0;left:0;z-index:" + d.z + ";opacity:" + d.o,
+    e("body")[0].appendChild(m),
+    o(),
+    window.onresize = o,
+    window.onmousemove = function(n) {
+        n = n || window.event,
+        y.x = n.clientX,
+        y.y = n.clientY
+    },
+    window.onmouseout = function() {
+        y.x = null,
+        y.y = null
+    };
+    for (var s = [], f = 0; d.n > f; f++) {
+        var h = w() * a,
+        g = w() * c,
+        v = 2 * w() - 1,
+        p = 2 * w() - 1;
+        s.push({
+            x: h,
+            y: g,
+            xa: v,
+            ya: p,
+            max: 6e3
+        })
+    }
+    u = s.concat([y]),
+    setTimeout(function() {
+        i()
+    },
+    100)
+} ();
+</script>
+
+<script type='text/javascript' id='clustrmaps' src='//cdn.clustrmaps.com/map_v2.js?cl=ffffff&w=350&t=m&d=1NqKKNlM62oDkLYA7mQMmVg49mUH_Ib-6MkRgvd04o8&co=2d78ad&cmo=ffc253&cmn=ff5353&ct=ffffff'></script>
+
+</html>
