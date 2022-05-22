@@ -13,7 +13,7 @@
 
 
 
-<title>imagecompress | Hexo</title>
+<title>Image_compress | Hexo</title>
 
 
 
@@ -201,7 +201,7 @@
     
     <article class="post-wrap">
         <header class="post-header">
-            <h1 class="post-title">imagecompress</h1>
+            <h1 class="post-title">Image_compress</h1>
             
                 <div class="post-meta">
                     
@@ -245,22 +245,29 @@
 <h2 id="引子"><a href="#引子" class="headerlink" title="引子"></a>引子</h2><p><img src="/2022/05/19/imagecompress/image-20220519152830270.png" alt="image-20220519152830270"></p>
 <p><strong>核心问题：</strong>图片压缩过程中哪类信息可以去除，怎么去除</p>
 <p><img src="/2022/05/19/imagecompress/image-20220519153141089.png" alt="image-20220519153141089"></p>
-<p>科学家发现人眼对亮度更敏感对颜色没那么敏感——JPEG压缩方案考虑了这个特点——想要知道怎么做必须深入探索色彩空间领域</p>
-<div align="center">
-    <img src="/2022/05/19/imagecompress/colorspace.png" alt="colorspace" style="zoom:40%;">
-    <img src="/2022/05/19/imagecompress/color.png" alt="color" style="zoom:77%;">
+<p>科学家发现人眼对亮度更敏感对颜色没那么敏感——JPEG压缩方案考虑了这个特点——想要知道怎么做必须深入探索色彩空间领域。</p>
+<div style="display:table; width:100%;">
+    <div style="display:table-row">
+        <div style="display:table-cell; width:25%"><img src="/2022/05/19/imagecompress/colorspace.png"></div>
+        <div style="display:table-cell; width:27%;"><img src="/2022/05/19/imagecompress/color.png"></div>
+    </div>
 </div>
 
-<p>RGB色彩空间有个特点：如果沿着对角线走从原点走到（255，255，255），就能得到逐渐变亮的颜色，这些点构成的线定义了所有可能的灰阶颜色，这是衡量亮度最直接的方式。将亮度独立出来的想法是另一个色彩空间的基石<code>YCbCr</code> ,<code>Y</code>分量衡量的是图片的“流明”或亮度，<code>Cb</code>和<code>Cr</code>存储的是颜色信息。<code>Y</code>可以视为一个单独的纵轴，值越大表明亮度越大。JPEG使用的这种色彩空间的原因是让我们能直接调用最适合人眼识别的颜色</p>
-<div align="center">
-    <img src="/2022/05/19/imagecompress/1.png" alt="1" style="zoom:20%;">
-    <img src="/2022/05/19/imagecompress/2.png" alt="2" style="zoom:20%;">
+<p>RGB色彩空间有个特点：如果沿着对角线走从原点走到（255，255，255），就能得到逐渐变亮的颜色，这些点构成的线定义了所有可能的灰阶颜色，这是衡量亮度最直接的方式。将亮度独立出来的想法是另一个色彩空间的基石<code>YCbCr</code> ,<code>Y</code>分量衡量的是图片的“流明”或亮度，<code>Cb</code>和<code>Cr</code>存储的是颜色信息。<code>Y</code>可以视为一个单独的纵轴，值越大表明亮度越大。JPEG使用的这种色彩空间的原因是让我们能直接调用最适合人眼识别的颜色。</p>
+<div style="display:table; width:100%;">
+    <div style="display:table-row">
+        <div style="display:table-cell; width:25%"><img src="/2022/05/19/imagecompress/1.png"></div>
+        <div style="display:table-cell; text-align:right; width:25%;"><img src="/2022/05/19/imagecompress/2.png"></div>
+    </div>
 </div>
 
 <p>由于人对亮度敏感度高，其中一个压缩原图的思路就是缩减<code>Cb</code>和<code>Cr</code>分量的采样数，但把亮度分量全保留。这个技术被称为“色度下采样/色度抽样”。</p>
-<h2 id="色度下采样-x2F-色度抽样"><a href="#色度下采样-x2F-色度抽样" class="headerlink" title="色度下采样/色度抽样"></a>色度下采样/色度抽样</h2><div align="center">
-    <img src="/2022/05/19/imagecompress/3.png" alt="3" style="zoom:25%;">
-    <img src="/2022/05/19/imagecompress/4.png" alt="4" style="zoom:20%;">
+<hr>
+<h2 id="色度下采样-x2F-色度抽样"><a href="#色度下采样-x2F-色度抽样" class="headerlink" title="色度下采样/色度抽样"></a>色度下采样/色度抽样</h2><div style="display:table; width:100%;">
+    <div style="display:table-row">
+        <div style="display:table-cell; width:25%"><img src="/2022/05/19/imagecompress/3.png"></div>
+        <div style="display:table-cell; text-align:right; width:55%;"><img src="/2022/05/19/imagecompress/4.png"></div>
+    </div>
 </div>
 
 <p><code>色度下采样</code>的具体操作是对原图种四个像素点求平均得到一个值；<code>色度抽样</code>通常选左上角像素值代表整个2×2区域的颜色，待色彩分量的采样数缩减后就可以和亮度分量合并如上右图所示。在这里色彩分量保持16个像素，这就得到了抽样后的图像。</p>
@@ -268,28 +275,33 @@
 
 <p>至此距离JPEG 95%的压缩率仍有距离，需要考虑其他方面</p>
 <p><img src="/2022/05/19/imagecompress/image-20220519162214777.png" alt="image-20220519162214777"></p>
-<p>##Y</p>
-<p>下面的压缩环节我们关注<code>Y</code>通道,本节的核心原理同样可以用于色彩分量</p>
+<h2 id="Y"><a href="#Y" class="headerlink" title="Y"></a>Y</h2><p>下面的压缩环节我们关注<code>Y</code>通道,本节的核心原理同样可以用于色彩分量</p>
 <h3 id="DCT概述"><a href="#DCT概述" class="headerlink" title="DCT概述"></a>DCT概述</h3><p>我们需要以完全不同的视角来看待图片，有一个看待图片的角度是将图片视作“信号”</p>
 <p><img src="/2022/05/19/imagecompress/image-20220519162908961.png" alt="image-20220519162908961"></p>
 <p>取出图片中若干像素构成的一行，使我们得以讨论图片里的“频率分量”</p>
 <p><img src="/2022/05/19/imagecompress/image-20220519163136283.png" alt="image-20220519163136283"></p>
 <p><img src="/2022/05/19/imagecompress/image-20220519163255418.png" alt="image-20220519163255418"></p>
 <p>人类视觉系统通常对图片的高频细节不敏感，因此JPEG会有策略地去除图片中不太重要、较少见的高频信号，达到更大的压缩率。<strong>那么如何提取频率分量呢？</strong></p>
-<div align="center">
-    <img src="/2022/05/19/imagecompress/5.png" alt="5" style="zoom:64%;">
-    <img src="/2022/05/19/imagecompress/6.png" alt="6" style="zoom:36%;">
+<div style="display:table; width:100%;">
+    <div style="display:table-row">
+        <div style="display:table-cell; width:33%"><img src="/2022/05/19/imagecompress/5.png"></div>
+        <div style="display:table-cell; text-align:right; width:30%;"><img src="/2022/05/19/imagecompress/6.png"></div>
+    </div>
 </div>
+
 
 <p>先将这8个像素当成是某种信号，<code>DCT</code>将原始信号的<strong>样本点</strong>作为输入。</p>
 <p><img src="/2022/05/19/imagecompress/image-20220519165127117.png" alt="image-20220519165127117"></p>
 <p><img src="/2022/05/19/imagecompress/image-20220519165454818.png" alt="image-20220519165454818"></p>
 <p>用“系数”来描述<code>DCT</code>的输出,==<strong>这些系数描述了组成原始信号的不同频率余弦波的权重</strong>== 。本质是求出某个特定的余弦波应在信号里包含多少。</p>
 <p>可以把这个过程类比为将复杂的信号拆分成简单余弦波的加权求和，<strong>那么到底使用了哪些余弦波，波如何和图中的像素建立关联？</strong>以下取cos(x)为例</p>
-<div align="center">
-    <img src="/2022/05/19/imagecompress/7.png" alt="7" style="zoom:34%;">
-    <img src="/2022/05/19/imagecompress/8.png" alt="8" style="zoom:26%;">
+<div style="display:table; width:100%;">
+    <div style="display:table-row">
+        <div style="display:table-cell; width:40%"><img src="/2022/05/19/imagecompress/7.png"></div>
+        <div style="display:table-cell; text-align:right; width:25%;"><img src="/2022/05/19/imagecompress/8.png"></div>
+    </div>
 </div>
+
 
 <p>为了与之前的例子保持一致，我们需要在余弦波中采8个点做样本</p>
 <p><img src="/2022/05/19/imagecompress/9.png" alt="image-20220519165454818"></p>
