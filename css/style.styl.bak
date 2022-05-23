@@ -12,6 +12,7 @@
 // icon
 @import "../fonts/iconfont/iconfont.css"
 @import "../fonts/iconfont2/iconfont.css"
+@import "../fonts/iconfont4/iconfont.css"
 // partial
 @import "_partial/header.styl"
 @import "_partial/footer.styl"
