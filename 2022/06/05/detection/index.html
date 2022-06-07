@@ -442,7 +442,7 @@
 					
 						<span class="post-count">
 					📑Words:
-						<a href="">598</a>
+						<a href="">607</a>
 						</span>
 					
 					
@@ -485,12 +485,17 @@
 <li><p><code>annotations/</code>        #该文件下共六种json文件，此处只取两种</p>
 <ul>
 <li><code>instances_train2017.json</code>    # instances：为目标检测与实例分割的标注文件</li>
-<li><code>instances_val2017.json</code></li>
+<li><code>instances_val2017.json</code>json文件主要包含以下几个字段</li>
 </ul>
 </li>
 </ul>
 <blockquote>
-<h1 id="json文件主要包含以下几个字段"><a href="#json文件主要包含以下几个字段" class="headerlink" title="json文件主要包含以下几个字段"></a>json文件主要包含以下几个字段</h1><p>{<br>    “info”: info, # dict 数据集描述<br>     “licenses”: [license], # list ，内部是dict<br>     “images”: [image], # list ，主要包括file_name, height, width，其中id是图片的唯一标识<br>     “annotations”: [annotation], # list ，主要包括检测与分割的标注信息<br>     “categories”: # list ，内部是dict id,  主要字段包括image_id,  category_id,  segmentation,  num_keypoints,  area,  iscrowd,  keypoints，bbox等<br> }</p>
+<p>json文件主要包含以下几个字段</p>
+<p>{<br> “info”: info, # dict 数据集描述</p>
+<p>  “licenses”: [license], # list ，内部是dict</p>
+<p>  “images”: [image], # 主要包括file_name, height, width，id是图片的唯一标识</p>
+<p>  “annotations”: [annotation], # list ，主要包括检测与分割的标注信息</p>
+<p>  “categories”: # list ，内部是dict id,  主要字段包括image_id,  category_id,  segmentation,  num_keypoints,  area,  iscrowd,  keypoints，bbox等<br>}</p>
 </blockquote>
 <ul>
 <li><code>images/</code><ul>
@@ -508,11 +513,12 @@
 </li>
 </ul>
 <h2 id="3-Labelme"><a href="#3-Labelme" class="headerlink" title="3. Labelme"></a>3. Labelme</h2><ul>
-<li><p><code>labelme/</code></p>
-</li>
+<li><code>labelme/</code><ul>
 <li><p><code>.json</code></p>
 </li>
 <li><p><code>.jpg</code></p>
+</li>
+</ul>
 </li>
 </ul>
 <p><code>labelme2coco</code>:<a target="_blank" rel="noopener" href="https://github.com/spytensor/prepare_detection_dataset/blob/master/labelme2coco.py">https://github.com/spytensor/prepare_detection_dataset/blob/master/labelme2coco.py</a></p>
