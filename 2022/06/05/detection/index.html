@@ -57,27 +57,27 @@
 
 
     <script>
-       function searchToggle() {
-           const width = $(document.body).width()
-           if(width > 479) {
-               return;
-           }
-           const search = $('.search');
-		   const searchForm = $('.form-search')
-		   const menuToggle = $('.menu-toggle');
-		   const title = $('.navbar-header-title ');
+    function searchToggle() {
+        const width = $(document.body).width()
+        if(width > 479) {
+            return;
+        }
+        const search = $('.search');
+		const searchForm = $('.form-search')
+		const menuToggle = $('.menu-toggle');
+		const title = $('.navbar-header-title ');
 
-           if(!search.hasClass("mobile-search")) {
-               search.addClass("mobile-search");
-			   menuToggle.addClass("open-search")
-			   title.addClass("mobile-title-hidden")
-           } else {
-               search.removeClass("mobile-search");
-			   menuToggle.removeClass("open-search")
-			   // title.css({visibility: 'visible'})
-			   title.removeClass("mobile-title-hidden")
-           } 
-       }
+        if(!search.hasClass("mobile-search")) {
+            search.addClass("mobile-search");
+			menuToggle.addClass("open-search")
+			title.addClass("mobile-title-hidden")
+        } else {
+            search.removeClass("mobile-search");
+			menuToggle.removeClass("open-search")
+			// title.css({visibility: 'visible'})
+			title.removeClass("mobile-title-hidden")
+        } 
+    }
 
     function searchToggle() {
         const width = $(document.body).width()
@@ -600,7 +600,7 @@
                 <a class="prev" rel="prev" href="/2022/06/06/VisionGNN/">Vision GNN</a>
             
             
-            <a class="next" rel="next" href="/2022/05/22/%E8%A7%81%E6%9C%A8%E5%BF%83/">见木心</a>
+            <a class="next" rel="next" href="/2022/05/22/Mu/">MUxin</a>
             
         </section>
 
