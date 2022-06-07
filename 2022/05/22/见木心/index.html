@@ -359,6 +359,68 @@
                 <div class="container">
     
     
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
 
     
     <article class="post-wrap">
@@ -380,7 +442,7 @@
 					
 						<span class="post-count">
 					📑Words:
-						<a href="">0</a>
+						<a href="">150</a>
 						</span>
 					
 					
@@ -394,7 +456,21 @@
         </header>
 
         <div class="post-content">
-            
+            <h1 id="原引"><a href="#原引" class="headerlink" title="原引"></a>原引</h1><blockquote>
+<p>鲜有良朋，贶也永叹——《诗经》</p>
+<p>（“贶”，音同“况”，赐的意思），取《诗经》，意思是少有朋友和我长叹长谈了。</p>
+</blockquote>
+<blockquote>
+<p>微神之躬，胡为乎泥中——《诗经》</p>
+<p>若不是为了你的缘故，我不会在泥中打滚</p>
+</blockquote>
+<blockquote>
+<p>凡是令我倾心的书，都分辨不清是我在理解它呢还是它在理解我。</p>
+</blockquote>
+<blockquote>
+<p>我爱的物、事、人，是不太提的。我爱音乐，不太听的。我爱某人，不太去看他的。现实生活中遇到他，我一定远远避开他。这是我的乖僻，是为了更近人情。</p>
+</blockquote>
+
         </div>
 
         
@@ -444,6 +520,8 @@
             </div>
         </section>
         <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2022/06/05/detection/">data processing</a>
             
             
             <a class="next" rel="next" href="/2022/05/19/imagecompress/">Image_compress</a>

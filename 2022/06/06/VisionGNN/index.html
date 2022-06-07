@@ -13,7 +13,7 @@
 
 
 
-<title>Archives: 2022/4 | Hexo</title>
+<title>Vision GNN | Hexo</title>
 
 
 
@@ -356,22 +356,223 @@
     }
 </script>
             <div class="main">
-                <div class="post-wrap archive">
+                <div class="container">
     
     
-        
-
-        
-            <h3>2022</h3>
-        
-
-        <article class="archive-item">
-            <a class="archive-item-link" href="/2022/04/25/pytorch/">Pytorch</a>
-            <span class="archive-item-date">April 25, 2022</span>
-        </article>
-    
-    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
 </div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">Vision GNN</h1>
+            
+                <div class="post-meta">
+                    
+                        👨‍🎓Author: <a itemprop="author" rel="author" href="/">CY</a>
+                    
+
+                    
+                        <span class="post-time">
+                        📅Date: <a href="#">June 6, 2022&nbsp;&nbsp;22:46:01</a>
+                        </span>
+                    
+                    
+					
+					
+						<span class="post-count">
+					📑Words:
+						<a href="">549</a>
+						</span>
+					
+					
+						<span class="post-count">
+					⏱️Time:
+						<a href="">2min</a>  
+						</span>
+					
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h1 id="Vision-GNN-An-Image-is-Worth-Graph-of-Nodes"><a href="#Vision-GNN-An-Image-is-Worth-Graph-of-Nodes" class="headerlink" title="Vision GNN: An Image is Worth Graph of Nodes"></a>Vision GNN: An Image is Worth Graph of Nodes</h1><blockquote>
+<p>将图结构应用于图像领域，将VIT中的patches视作nodes。该网络主要由<code>GCN</code>和<code>FFN</code>组成。其中<code>GCN</code>模块来聚合、处理图结构信息；<code>FFN</code>模块对节点特征作变化，获取节点信息的多样性。<a target="_blank" rel="noopener" href="https://readpaper.com/pdf-annotate/note?noteId=693400681528512512&amp;pdfId=4630291798619602945">论文链接</a></p>
+</blockquote>
+<p><img src="/2022/06/06/VisionGNN/image-20220606230827512.png" alt="image-20220606230827512"></p>
+<p>   如上图所示，节点之间的连接由其内容确定，不受位置关系限制。网格、序列都可以看成是图的特例。</p>
+<p><img src="/2022/06/06/VisionGNN/image-20220607131156703.png" alt="image-20220607131156703"></p>
+<p>上图是图片如何表示成图的一个例子。蓝色点 表示<code>adjacent matrix</code>，白色点表示无连接；通常是很大的<code>sparse matrix</code>。</p>
+<blockquote>
+<p>图片出处：<a target="_blank" rel="noopener" href="https://distill.pub/2021/gnn-intro/">A Gentle Introduction to Graph Neural Networks</a></p>
+</blockquote>
+<h1 id="How-to-transform-an-image-to-a-graph"><a href="#How-to-transform-an-image-to-a-graph" class="headerlink" title="How to transform an image to a graph"></a>How to transform an image to a graph</h1><h2 id="VIG"><a href="#VIG" class="headerlink" title="VIG"></a>VIG</h2><p><img src="/2022/06/06/VisionGNN/image-20220606231533521.png" alt="image-20220606231533521"></p>
+<p>   网络的关键在于：如何将图像表示为图结构、如何学习图结构中的视觉表征</p>
+<h3 id="Graph-Representation-of-Image"><a href="#Graph-Representation-of-Image" class="headerlink" title="Graph Representation of Image"></a>Graph Representation of Image</h3><p><img src="/2022/06/06/VisionGNN/image-20220606232134301.png" alt="image-20220606232134301"></p>
+<p>此处<code>K取9~15</code>效果最佳</p>
+<h3 id="GCN"><a href="#GCN" class="headerlink" title="GCN"></a>GCN</h3><p>  图卷积通过聚合相邻节点的特征来实现节点之间的信息交换。</p>
+<p><img src="/2022/06/06/VisionGNN/image-20220606233416153.png" alt="image-20220606233416153"></p>
+<p>   具体的说图卷积分为聚合和更新两个操作。</p>
+<ul>
+<li><code> aggregation operation</code>: 操作通过聚合邻接节点的特征来计算当前节点的表示</li>
+<li><code> multi-head update operation</code>: 将聚合后的特征分为<code>h</code>个头，每个头对应不同的更新权重，有利于特征的多样性表达。</li>
+</ul>
+<p><img src="/2022/06/06/VisionGNN/image-20220606234233716.png" alt="image-20220606234233716"></p>
+<p>​    <code>GCN</code>在网络变深后会有**”过平滑现象”<strong>，这会降低节点特征的区分度，导致视觉识别性能下降。本文在</strong>图卷积后**的每个节点内引入了更多     的特征变化，促增加节点特征多样性。 </p>
+<p><img src="/2022/06/06/VisionGNN/image-20220606235817431.png" alt="image-20220606235817431"></p>
+<p>   本文对应的解决策略如公式6所示。**为了进一步提高特征转换能力和缓解过平滑现象，本文在每个节点上使用<code>FFN</code>**，过程如下所示。<br>$$<br>Z = σ(Y W1)W2 + Y<br>$$<br>   基于本节的<code>graph representation of images</code> 和<code>ViG block</code>，VIG网络可以随着网络的加深，保持特征的多样性，从而学习判别性的表示。</p>
+<h2 id="Experiments"><a href="#Experiments" class="headerlink" title="Experiments"></a>Experiments</h2><p><img src="/2022/06/06/VisionGNN/image-20220607124600794.png" alt="image-20220607124600794"></p>
+<p><img src="/2022/06/06/VisionGNN/image-20220607124657067.png" alt="image-20220607124657067"></p>
+<p><img src="/2022/06/06/VisionGNN/image-20220607124921992.png" alt="image-20220607124921992"></p>
+<h3 id="Visualization"><a href="#Visualization" class="headerlink" title="Visualization"></a>Visualization</h3><p><img src="/2022/06/06/VisionGNN/image-20220607125000107.png" alt="image-20220607125000107"></p>
+<p>   可视化结果：浅层邻接节点的选取基于低级、局部特征如：颜色和纹理，深层中邻接节点的选取更依赖于语义等高级特征。</p>
+<h3 id="Pseudocode"><a href="#Pseudocode" class="headerlink" title="Pseudocode"></a>Pseudocode</h3><p><img src="/2022/06/06/VisionGNN/image-20220607130309524.png" alt="image-20220607130309524"></p>
+<img src="/2022/06/06/VisionGNN/image-20220607130529777.png" alt="image-20220607130529777" style="zoom:150%;">
+
+<img src="/2022/06/06/VisionGNN/image-20220607130639174.png" alt="image-20220607130639174" style="zoom:150%;">
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>CY</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>Permalink:</span>
+                        <span><a href="http://example.com/2022/06/06/VisionGNN/">http://example.com/2022/06/06/VisionGNN/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>Do you believe in <strong>DESTINY</strong>?</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/paper/"># paper</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+            
+            <a class="next" rel="next" href="/2022/06/05/detection/">data processing</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+
+
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.min.js"></script>
+<div id="gitalk-container"></div>
+<script type="text/javascript">
+      var gitalk = new Gitalk({
+        clientID: '9810f94b2996825e7931',
+        clientSecret: 'c1aee8c436730130e3ad18694d20888a1ee13bce',
+        repo: 'Seperendity.github.io',
+        owner: 'Seperendity',
+        admin: 'Seperendity',
+        id: location.pathname,
+        labels: 'Gitalk'.split(',').filter(l => l),
+        perPage: 10,
+        pagerDirection: 'last',
+        createIssueManually: true,
+        distractionFreeMode: false
+      })
+      gitalk.render('gitalk-container')
+</script>
+
             </div>
             <footer id="footer" class="footer">
     <div class="copyright">

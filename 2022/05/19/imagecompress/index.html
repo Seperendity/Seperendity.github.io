@@ -449,13 +449,13 @@
 					
 						<span class="post-count">
 					📑Words:
-						<a href="">1.9k</a>
+						<a href="">2.1k</a>
 						</span>
 					
 					
 						<span class="post-count">
 					⏱️Time:
-						<a href="">6min</a>  
+						<a href="">7min</a>  
 						</span>
 					
                 </div>
@@ -481,9 +481,10 @@
 <div style="display:table; width:100%;">
     <div style="display:table-row">
         <div style="display:table-cell; width:25%"><img src="/2022/05/19/imagecompress/1.png"></div>
-        <div style="display:table-cell; text-align:right; width:25%;"><img src="/2022/05/19/imagecompress/2.png"></div>
+        <div style="display:table-cell; text-align:right; width:26%;"><img src="/2022/05/19/imagecompress/2.png"></div>
     </div>
 </div>
+
 
 <p>由于人对亮度敏感度高，其中一个压缩原图的思路就是缩减<code>Cb</code>和<code>Cr</code>分量的采样数，但把亮度分量全保留。这个技术被称为“色度下采样/色度抽样”。</p>
 <hr>
@@ -522,9 +523,10 @@
 <div style="display:table; width:100%;">
     <div style="display:table-row">
         <div style="display:table-cell; width:40%"><img src="/2022/05/19/imagecompress/7.png"></div>
-        <div style="display:table-cell; text-align:right; width:25%;"><img src="/2022/05/19/imagecompress/8.png"></div>
+        <div style="display:table-cell; text-align:right; width:26%;"><img src="/2022/05/19/imagecompress/8.png"></div>
     </div>
 </div>
+
 
 
 <p>为了与之前的例子保持一致，我们需要在余弦波中采8个点做样本</p>
@@ -542,6 +544,9 @@
 <p>向量点积的形式是衡量两者相似性的好方法，这解释了当我们对频率为<code>k</code>的余弦波采样，将其输入<code>DCT</code>后位于<code>k</code>号位的系数为何会出现尖峰。这两个向量互为倍数，所以点积被最大化了</p>
 <p><img src="/2022/05/19/imagecompress/image-20220519204120404.png" alt="image-20220519204120404"></p>
 <p>我们可以把整个<code>DCT</code>看成是矩阵与向量之积，矩阵每行是各自频率的余弦波中的采样点，**==令人震惊的是矩阵中每行都是相互正交的==**，这就是为什么直接只输入一个特定频率的余弦波时，其他系数没有任何贡献（来自不同余弦波的采样点相互正交 ）</p>
+<blockquote>
+<p>扩展：DFT中扩展序列时，是直接采用平移方式引入了不连续的区间，而DCT采用对称形式，消除了这一人为的不连续（扩展后的函数在该点变化非常快，信号分解过程中会出现多个高频信号），而通常高频信号隐藏在这人造的不连续中。这也正是为什么DCT的能量聚集效果会更好。</p>
+</blockquote>
 <h3 id="JPEG如何具体使用DCT"><a href="#JPEG如何具体使用DCT" class="headerlink" title="JPEG如何具体使用DCT"></a>JPEG如何具体使用DCT</h3><p><img src="/2022/05/19/imagecompress/image-20220519205438515.png" alt="image-20220519205438515"></p>
 <p>首先将图片分为多个8*8的区域，各个元素减去128使值域中心为0，再对这个矩阵的行列进行<code>DCT</code>变换，各系数分别代表某个8 * 8图案的权重，其他格子都是第一行和第一列这些基础图案的组合</p>
 <p><img src="/2022/05/19/imagecompress/image-20220519221457268.png" alt="image-20220519221457268"></p>
@@ -554,7 +559,7 @@
 <p>解码阶段不太重要的高频分量会出现一大堆0，完成量化后，可以利用冗余来进一步压缩，这涉及到<code>游程编码和霍夫曼编码的组合</code>。</p>
 <p><img src="/2022/05/19/imagecompress/image-20220520095419761.png" alt="image-20220520095419761"></p>
 <p>编码将系数按之字形排列，让序列尽量多出现连续0，然后用游程编码压缩，霍夫曼编码较复杂此处省略具体操作。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>JPEG中的许多革新时源于人类视觉系统的实验和理解，这让我们知道人眼对色彩和高频信息并不敏感，音频视频压缩上也偶同样的技术应用。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>JPEG中的许多革新时源于人类视觉系统的实验和理解，这让我们知道人眼对色彩和高频信息并不敏感，音频视频压缩上也可同样的技术应用。</p>
 <blockquote>
 <p><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1iv4y1N7sq?spm_id_from=444.41.list.card_archive.click">视频：JPEG不可思议的压缩率</a></p>
 </blockquote>
