@@ -450,7 +450,7 @@
 					
 						<span class="post-count">
 					📑Words:
-						<a href="">549</a>
+						<a href="">559</a>
 						</span>
 					
 					
@@ -464,39 +464,49 @@
         </header>
 
         <div class="post-content">
-            <h1 id="Vision-GNN-An-Image-is-Worth-Graph-of-Nodes"><a href="#Vision-GNN-An-Image-is-Worth-Graph-of-Nodes" class="headerlink" title="Vision GNN: An Image is Worth Graph of Nodes"></a>Vision GNN: An Image is Worth Graph of Nodes</h1><blockquote>
+            <h1 id="vision-gnn-an-image-is-worth-graph-of-nodes"><a class="markdownIt-Anchor" href="#vision-gnn-an-image-is-worth-graph-of-nodes"></a> Vision GNN: An Image is Worth Graph of Nodes</h1>
+<blockquote>
 <p>将图结构应用于图像领域，将VIT中的patches视作nodes。该网络主要由<code>GCN</code>和<code>FFN</code>组成。其中<code>GCN</code>模块来聚合、处理图结构信息；<code>FFN</code>模块对节点特征作变化，获取节点信息的多样性。<a target="_blank" rel="noopener" href="https://readpaper.com/pdf-annotate/note?noteId=693400681528512512&amp;pdfId=4630291798619602945">论文链接</a></p>
 </blockquote>
 <p><img src="/2022/06/06/VisionGNN/image-20220606230827512.png" alt="image-20220606230827512"></p>
-<p>   如上图所示，节点之间的连接由其内容确定，不受位置关系限制。网格、序列都可以看成是图的特例。</p>
+<p>如上图所示，节点之间的连接由其内容确定，不受位置关系限制。网格、序列都可以看成是图的特例。</p>
 <p><img src="/2022/06/06/VisionGNN/image-20220607131156703.png" alt="image-20220607131156703"></p>
 <p>上图是图片如何表示成图的一个例子。蓝色点 表示<code>adjacent matrix</code>，白色点表示无连接；通常是很大的<code>sparse matrix</code>。</p>
 <blockquote>
 <p>图片出处：<a target="_blank" rel="noopener" href="https://distill.pub/2021/gnn-intro/">A Gentle Introduction to Graph Neural Networks</a></p>
 </blockquote>
-<h1 id="How-to-transform-an-image-to-a-graph"><a href="#How-to-transform-an-image-to-a-graph" class="headerlink" title="How to transform an image to a graph"></a>How to transform an image to a graph</h1><h2 id="VIG"><a href="#VIG" class="headerlink" title="VIG"></a>VIG</h2><p><img src="/2022/06/06/VisionGNN/image-20220606231533521.png" alt="image-20220606231533521"></p>
-<p>   网络的关键在于：如何将图像表示为图结构、如何学习图结构中的视觉表征</p>
-<h3 id="Graph-Representation-of-Image"><a href="#Graph-Representation-of-Image" class="headerlink" title="Graph Representation of Image"></a>Graph Representation of Image</h3><p><img src="/2022/06/06/VisionGNN/image-20220606232134301.png" alt="image-20220606232134301"></p>
+<h1 id="how-to-transform-an-image-to-a-graph"><a class="markdownIt-Anchor" href="#how-to-transform-an-image-to-a-graph"></a> How to transform an image to a graph</h1>
+<h2 id="vig"><a class="markdownIt-Anchor" href="#vig"></a> VIG</h2>
+<p><img src="/2022/06/06/VisionGNN/image-20220606231533521.png" alt="image-20220606231533521"></p>
+<p>网络的关键在于：如何将图像表示为图结构、如何学习图结构中的视觉表征</p>
+<h3 id="graph-representation-of-image"><a class="markdownIt-Anchor" href="#graph-representation-of-image"></a> Graph Representation of Image</h3>
+<p><img src="/2022/06/06/VisionGNN/image-20220606232134301.png" alt="image-20220606232134301"></p>
 <p>此处<code>K取9~15</code>效果最佳</p>
-<h3 id="GCN"><a href="#GCN" class="headerlink" title="GCN"></a>GCN</h3><p>  图卷积通过聚合相邻节点的特征来实现节点之间的信息交换。</p>
+<h3 id="gcn"><a class="markdownIt-Anchor" href="#gcn"></a> GCN</h3>
+<p>图卷积通过聚合相邻节点的特征来实现节点之间的信息交换。</p>
 <p><img src="/2022/06/06/VisionGNN/image-20220606233416153.png" alt="image-20220606233416153"></p>
-<p>   具体的说图卷积分为聚合和更新两个操作。</p>
+<p>具体的说图卷积分为聚合和更新两个操作。</p>
 <ul>
-<li><code> aggregation operation</code>: 操作通过聚合邻接节点的特征来计算当前节点的表示</li>
-<li><code> multi-head update operation</code>: 将聚合后的特征分为<code>h</code>个头，每个头对应不同的更新权重，有利于特征的多样性表达。</li>
+<li><code>aggregation operation</code>: 操作通过聚合邻接节点的特征来计算当前节点的表示</li>
+<li><code>multi-head update operation</code>: 将聚合后的特征分为<code>h</code>个头，每个头对应不同的更新权重，有利于特征的多样性表达。</li>
 </ul>
 <p><img src="/2022/06/06/VisionGNN/image-20220606234233716.png" alt="image-20220606234233716"></p>
-<p>​    <code>GCN</code>在网络变深后会有<strong>过平滑现象</strong>，这会降低节点特征的区分度，导致视觉识别性能下降。本文在<strong>图卷积后</strong>的每个节点内引入了更多的特征变化，促增加节点特征多样性。 </p>
+<p>​    <code>GCN</code>在网络变深后会有<strong>过平滑现象</strong>，这会降低节点特征的区分度，导致视觉识别性能下降。本文在<strong>图卷积后</strong>的每个节点内引入了更多的特征变化，促增加节点特征多样性。</p>
 <p><img src="/2022/06/06/VisionGNN/image-20220606235817431.png" alt="image-20220606235817431"></p>
-<p>   本文对应的解决策略如公式6所示。**为了进一步提高特征转换能力和缓解过平滑现象，本文在每个节点上使用<code>FFN</code>**，过程如下所示。<br>$$<br>Z = σ(Y W1)W2 + Y<br>$$<br>   基于本节的<code>graph representation of images</code> 和<code>ViG block</code>，VIG网络可以随着网络的加深，保持特征的多样性，从而学习判别性的表示。</p>
-<h2 id="Experiments"><a href="#Experiments" class="headerlink" title="Experiments"></a>Experiments</h2><p><img src="/2022/06/06/VisionGNN/image-20220607124600794.png" alt="image-20220607124600794"></p>
+<p>本文对应的解决策略如公式6所示。<strong>为了进一步提高特征转换能力和缓解过平滑现象，本文在每个节点上使用<code>FFN</code></strong>，过程如下所示。</p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>Z</mi><mo>=</mo><mi>σ</mi><mo stretchy="false">(</mo><mi>Y</mi><mi>W</mi><mn>1</mn><mo stretchy="false">)</mo><mi>W</mi><mn>2</mn><mo>+</mo><mi>Y</mi></mrow><annotation encoding="application/x-tex">Z = σ (Y W1 ) W2 + Y
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.07153em;">Z</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.03588em;">σ</span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.22222em;">Y</span><span class="mord mathdefault" style="margin-right:0.13889em;">W</span><span class="mord">1</span><span class="mclose">)</span><span class="mord mathdefault" style="margin-right:0.13889em;">W</span><span class="mord">2</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.22222em;">Y</span></span></span></span></span></p>
+<p>基于本节的<code>graph representation of images</code> 和<code>ViG block</code>，VIG网络可以随着网络的加深，保持特征的多样性，从而学习判别性的表示。</p>
+<h2 id="experiments"><a class="markdownIt-Anchor" href="#experiments"></a> Experiments</h2>
+<p><img src="/2022/06/06/VisionGNN/image-20220607124600794.png" alt="image-20220607124600794"></p>
 <p><img src="/2022/06/06/VisionGNN/image-20220607124657067.png" alt="image-20220607124657067"></p>
 <p><img src="/2022/06/06/VisionGNN/image-20220607124921992.png" alt="image-20220607124921992"></p>
-<h3 id="Visualization"><a href="#Visualization" class="headerlink" title="Visualization"></a>Visualization</h3><p><img src="/2022/06/06/VisionGNN/image-20220607125000107.png" alt="image-20220607125000107"></p>
-<p>   <strong>可视化结果：浅层邻接节点的选取基于低级、局部特征如：颜色和纹理，深层中邻接节点的选取更依赖于语义等高级特征。</strong></p>
-<h3 id="Pseudocode"><a href="#Pseudocode" class="headerlink" title="Pseudocode"></a>Pseudocode</h3><p><img src="/2022/06/06/VisionGNN/image-20220607130309524.png" alt="image-20220607130309524"></p>
+<h3 id="visualization"><a class="markdownIt-Anchor" href="#visualization"></a> Visualization</h3>
+<p><img src="/2022/06/06/VisionGNN/image-20220607125000107.png" alt="image-20220607125000107"></p>
+<p><strong>可视化结果：浅层邻接节点的选取基于低级、局部特征如：颜色和纹理，深层中邻接节点的选取更依赖于语义等高级特征。</strong></p>
+<h3 id="pseudocode"><a class="markdownIt-Anchor" href="#pseudocode"></a> Pseudocode</h3>
+<p><img src="/2022/06/06/VisionGNN/image-20220607130309524.png" alt="image-20220607130309524"></p>
 <img src="/2022/06/06/VisionGNN/image-20220607130529777.png" alt="image-20220607130529777" style="zoom:150%;">
-
 <img src="/2022/06/06/VisionGNN/image-20220607130639174.png" alt="image-20220607130639174" style="zoom:150%;">
 
         </div>
@@ -663,7 +673,7 @@
 		</div>
 		<div class="modal-overlay"></div>
 	</div>
-<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"log":false,"model":{"jsonPath":"/live2dw/assets/haruto.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":true},"react":{"opacity":0.7}});</script></body>
+</body>
 <script>
 !
 function() {
