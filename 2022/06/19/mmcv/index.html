@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="CY">
+
+
+
+
+
+<title>mmcv | Hexo</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+    <link rel="stylesheet" href="/../fonts/iconfont2/iconfont.css">
+    
+    <link rel="stylesheet" href="/../fonts/iconfont3/iconfont.css">
+    
+    <link rel="stylesheet" href="/../fonts/iconfont4/iconfont.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+    <script src="/js/jquery-3.6.0.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+<!-- 搜索的部分 -->
+
+
+
+    <script>
+    function searchToggle() {
+        const width = $(document.body).width()
+        if(width > 479) {
+            return;
+        }
+        const search = $('.search');
+		const searchForm = $('.form-search')
+		const menuToggle = $('.menu-toggle');
+		const title = $('.navbar-header-title ');
+
+        if(!search.hasClass("mobile-search")) {
+            search.addClass("mobile-search");
+			menuToggle.addClass("open-search")
+			title.addClass("mobile-title-hidden")
+        } else {
+            search.removeClass("mobile-search");
+			menuToggle.removeClass("open-search")
+			// title.css({visibility: 'visible'})
+			title.removeClass("mobile-title-hidden")
+        } 
+    }
+
+    function searchToggle() {
+        const width = $(document.body).width()
+        if(width > 479) {
+            return;
+        }
+        const search = $('.search');
+        const searchForm = $('.form-search');
+        const menuToggle = $('.menu-toggle');
+        const title = $('.navbar-header-title ');
+
+        if(!search.hasClass("mobile-search")) {
+            search.addClass("mobile-search");
+            menuToggle.addClass("open-search")
+            title.addClass("mobile-title-hidden")
+        } else {
+            search.removeClass("mobile-search");
+            menuToggle.removeClass("open-search")
+            // title.css({visibility: 'visible'})
+            title.removeClass("mobile-title-hidden")
+        } 
+    }
+
+
+
+    function search(searchInputEl, formEl, flag) {
+        const path = "/" + "search.json"; // 可以在public 下查看这个search.json
+        $(formEl).submit(function(e){
+            e.preventDefault();
+            let target = null
+            if(searchInputEl == null) {
+                const screenWidth = $(document.body).width();
+                target = screenWidth > 479 ? $('#pc-search-input') : $('#mobile-search-input');
+                console.log(target);
+            } else {
+                target = $(searchInputEl)
+            }
+
+            if(!flag && target.val() === '') {
+                return ;
+            }
+
+            $("#u-search").fadeIn(500, function() {
+                $("body > .wrapper").addClass("modal-active");
+
+                $.ajax({
+                    url: path,
+                    dataType: "json",
+                    beforeSend: function (xhr) {
+                        $input = target.val();
+                        $(".form-input").val($input);
+                        const loadingBar = $('.search-loading-bar') 
+                        loadingBar.css({
+                            width:'100%',
+                            display: 'block'
+                        });
+                    },
+                    success: function( datas ) {
+                        console.log(datas);
+                        const $resultPanel = $(".modal-body")[0];
+                        let str = `<ul class="modal-results">`;
+                        var keywords = $(".form-input").val().trim().toLowerCase().split(/[\s\-]+/);
+                        $resultPanel.innerHTML = "";
+                        let hasResult = false
+                        let text = `<div class="no-result">找不到与关键词相关的内容....</div>`;
+
+                        if ($(".form-input").val().trim().length <= 0) {
+                            // 没有结果
+                            $resultPanel.innerHTML = text;
+                            return;
+                        }
+                        datas.forEach(function (data, index) {
+                            var isMatch = true;
+                            if (!data.title || data.title.trim() === '') {
+                                data.title = "Untitled";
+                            }
+                            var data_title = data.title.trim().toLowerCase();
+                            var data_content = data.content && data.content.trim().replace(/<[^>]+>/g, "").toLowerCase() || '';
+                            var data_url = data.url;
+                            var index_title = -1;
+                            var index_content = -1;
+                            var first_occur = -1;
+                            // only match artiles with not empty contents
+                            if (data_content !== '') {
+                                keywords.forEach(function (keyword, i) {
+                                    index_title = data_title.indexOf(keyword);
+                                    index_content = data_content.indexOf(keyword);
+
+                                    if (index_title < 0 && index_content < 0) {
+                                        isMatch = false;
+                                    } else {
+                                        hasResult = true
+                                        if (index_content < 0) {
+                                            index_content = 0;
+                                        }
+                                        if (i == 0) {
+                                            first_occur = index_content;
+                                        }
+                                    }
+                                });
+                            } else {
+                                isMatch = false;
+                            }
+                            // show search results
+                            if (isMatch) {
+                                str += `<li class='result-item'><a href='${data_url}' class='result-item-detail'> <span class="title">${data_title}</span>`;
+                                var content = data.content.trim().replace(/<[^>]+>/g, "");
+                                if (first_occur >= 0) {
+                                    // cut out 200 characters
+                                    var start = first_occur - 40;
+                                    var end = first_occur + 160;
+
+                                    if (start < 0) {
+                                        start = 0;
+                                    }
+
+                                    if (start == 0) {
+                                        end = 200;
+                                    }
+
+                                    if (end > content.length) {
+                                        end = content.length;
+                                    }
+
+                                    var match_content = content.substring(start, end);
+
+                                    // highlight all keywords
+                                    keywords.forEach(function (keyword) {
+                                        var regS = new RegExp(keyword, "gi");
+                                        match_content = match_content.replace(regS, `<em class="search-keyword">${keyword}</em>`);
+                                    });
+
+                                    str += `<span class="content"> ${match_content} ...</span></a>`;
+                                }
+                                str += "</li>";
+                            }
+                        });
+                        str += "</ul>";
+                        if(hasResult) {
+                            $resultPanel.innerHTML = str;
+                        } else {
+                            $resultPanel.innerHTML = text;
+                        }
+
+                    },
+                    complete: function() {
+                        setTimeout(() => {
+                                const loadingBar = $('.search-loading-bar') 
+                                loadingBar.css({
+                                    width:'0%',
+                                    display: 'none'
+                                });
+                        }, 300)
+                    }
+                });
+            })
+
+        });
+    }
+
+    $(document).ready(function() {
+        $('.modal-close').click(function () { 
+            $("#u-search").fadeOut();
+            $("body > .wrapper").removeClass("modal-active")
+        })
+
+        $('.modal-overlay').click(function() {
+            $("#u-search").fadeOut();
+            $("body > .wrapper").removeClass("modal-active")
+        })
+        search(null, ".form-search", false)
+        search("#u-search-modal-form .form-input", ".u-search-modal-form", true)
+    })
+</script>
+
+<meta name="generator" content="Hexo 6.1.0">
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <!-- div class="navbar-header header-logo"><a href="/">CY&#39;s Blog</a></div -->
+			<div class="navbar-header header-logo"><a href="/"><i class="iconfont icon-zhuye" style="font-size: 1em;"></i>CY&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+				<!-- 这里表示的是pc端搜索框 -->
+				
+				
+    <div class="search ">
+        <div class="search-btn" onClick="searchToggle()">
+            <img src="/image/search.png" class="search-btn-img" />
+        </div>
+        <form class="form-search">
+            <input class="input" placeholder="点此搜索" autocomplete="off" id="pc-search-input"/>
+        </form>
+    </div>
+
+
+                
+                <a class="menu-item" href="/archives">📚Posts</a>
+                
+                <a class="menu-item" href="/category">📁Categories</a>
+                
+                <a class="menu-item" href="/tag">🏷️Tags</a>
+                
+                <a class="menu-item" href="/about">📑About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">CY&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+				<div class="navbar-mobile-right">
+					
+					
+    <div class="search ">
+        <div class="search-btn" onClick="searchToggle()">
+            <img src="/image/search.png" class="search-btn-img" />
+        </div>
+        <form class="form-search">
+            <input class="input" placeholder="点此搜索" autocomplete="off" id="mobile-search-input"/>
+        </form>
+    </div>
+
+
+					<div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+				</div>
+				
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                <a class="menu-item" href="/archives">📚Posts</a>
+                
+                <a class="menu-item" href="/category">📁Categories</a>
+                
+                <a class="menu-item" href="/tag">🏷️Tags</a>
+                
+                <a class="menu-item" href="/about">📑About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">mmcv</h1>
+            
+                <div class="post-meta">
+                    
+                        👨‍🎓Author: <a itemprop="author" rel="author" href="/">CY</a>
+                    
+
+                    
+                        <span class="post-time">
+                        📅Date: <a href="#">June 19, 2022&nbsp;&nbsp;19:44:24</a>
+                        </span>
+                    
+                    
+					
+					
+						<span class="post-count">
+					📑Words:
+						<a href="">961</a>
+						</span>
+					
+					
+						<span class="post-count">
+					⏱️Time:
+						<a href="">3min</a>  
+						</span>
+					
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h1 id="mmcv功能概览"><a class="markdownIt-Anchor" href="#mmcv功能概览"></a> mmcv功能概览</h1>
+<p><img src="/2022/06/19/mmcv/image-20220619194629220.png" alt="image-20220619194629220"></p>
+<ul>
+<li>
+<p>​	配置文件的可读性比原始的好，直接反映了配置和实现的关系。上图左中<code>type</code>表示此模型为<code>RetinaNet</code>，后续字典都是其属性。</p>
+</li>
+<li>
+<p>​    配置文件通过继承更清晰其中变动之处，不用每次去找不同之处了。</p>
+</li>
+<li>
+<p>​	不仅支持<code>python</code>格式的配置文件，也支持<code>yaml</code>等格式，但灵活性没那么好。</p>
+<p><img src="/2022/06/19/mmcv/image-20220619195356822.png" alt="image-20220619195356822"></p>
+</li>
+</ul>
+<p>配置文件中的各种参数代表了<code>RetinaHead</code>在构造时对应的值。其中绿色虚线框对应<code>**kwargs</code>，这些属性并不是给<code>RetinaHead</code>使用的，而是给其父类的。我们在<code>RetinaHead</code>中会调用父类的方法，利用<code>**kwargs</code>将父类对应的属性初始化</p>
+<p><img src="/2022/06/19/mmcv/image-20220619200037241.png" alt="image-20220619200037241"></p>
+<p><code>RetinaHead</code>仅仅只是<code>RetinaNet</code>中的一个字段，即传入的最外层传入一个<code>type</code>内层都是带<code>type</code>结构的子结构字典。我们只要保证在具体类的实现中，内部有去解析这些字典。对应图中<code>RetinaNet</code> 父类<code>SingleStangeDetector</code>中通过<code>build_backbone</code>在内部完成了对应属性的实例化</p>
+<p><img src="/2022/06/19/mmcv/image-20220619201554085.png" alt="image-20220619201554085"></p>
+<p><code>_base_</code>申明一个配置文件列表，会将所有配置文件中定义的变量加载进来。其中<code>model</code>是对父类中内部字段<strong>进行修改而不是覆盖</strong>。</p>
+<p>只有在其中加入<code>_delete_</code>属性才会覆盖父类中对应字段</p>
+<p>配置文件通过一个列表来表示，但不能显示的知道配置文件中到底由哪些组件构成。vscode插件<code>Config View</code>可以解决这个问题</p>
+<h2 id="config与registry"><a class="markdownIt-Anchor" href="#config与registry"></a> Config与Registry</h2>
+<p><img src="/2022/06/19/mmcv/image-20220619203517389.png" alt="image-20220619203517389"></p>
+<p>从<code>Config</code>中取对应字段的配置信息<strong>还没有将其变成具体的实例只有解析功能</strong>，要通过<code>Registry</code>将对应实例构建出来。</p>
+<p><img src="/2022/06/19/mmcv/image-20220619204730643.png" alt="image-20220619204730643"></p>
+<p>根据<code>type</code>字段将<code>cfg</code>粗略分为两个类型。<code>type</code>类型：<strong>训练时该变量的实例化后类型，其余字段为该变量实例化所需的参数。</strong><code>Registry</code>会根据<code>type</code> 和其他参数将变量实例化。</p>
+<p><code>mmcv</code>训练最外层的抽象是<code>runner</code>，其有非常多的属性，如果在配置文件中写入runner，会导致嵌入很多层级的字典，阅读不便。所以在可读性和一一映射关系上做了取舍。对于<code>dataloader</code>和<code>dataset</code>为了防止文件嵌套层级过深，只将一些显而易见的属性写在最外层，不将这些暴露给用户 。</p>
+<p><img src="/2022/06/19/mmcv/image-20220619210213182.png" alt="image-20220619210213182"></p>
+<p><img src="/2022/06/19/mmcv/image-20220619210605888.png" alt="image-20220619210605888"></p>
+<ul>
+<li>
+<p>左侧的方式每次构建完模型后都要手动向<code>model_factory</code>中加入一个字段。</p>
+</li>
+<li>
+<p>右侧是个<code>Registry</code>的最简形式。每个<code>Registry</code>实例都会有一个<code>module_dict</code>字典，利用一个装饰器实现将字符串与模型类的映射会自动添加到<code>module_dict</code>中，多一个模型只需多一行注册，便于维护。</p>
+</li>
+<li>
+<p>注册功能的具体用法：一种是装饰器的写法，只要对应脚本被执行（本身在运行该脚本或者在运行其他脚本时<code>import</code>该脚本，触发任意一种就完成注册行为）</p>
+<p>一种是注册外部模块的写法，将其作为函数使用。</p>
+</li>
+</ul>
+<p><img src="/2022/06/19/mmcv/image-20220619211754014.png" alt="image-20220619211754014"></p>
+<p><code>register_module</code>方法中可以传参，意味着不仅可以注册自己写的模块还可以注册外部的模块。</p>
+<p><img src="/2022/06/19/mmcv/image-20220619212028484.png" alt="image-20220619212028484"></p>
+<p>正因为<code>registry</code>可以注册外部模块我们才能在配置文件中调用到这些模块。</p>
+<p>以上注册代码都写在某个模块中 ，要注册这些模块必须要运行对应脚本。</p>
+<p><img src="/2022/06/19/mmcv/image-20220620201643776.png" alt="image-20220620201643776"></p>
+<p><img src="/2022/06/19/mmcv/image-20220620201933637.png" alt="image-20220620201933637"></p>
+<p>测试代码的注册过程在脚本执行过程就完成了注册，训练中注册过程可通过<code>import</code>。</p>
+<p>侵入式注册：这种链式的行为导致<code>mmdet</code>更新后可能会与本地分支产生冲突。非侵入式注册则的方式则不需要修改对应的算法库。</p>
+<p><img src="/2022/06/19/mmcv/image-20220620203346466.png" alt="image-20220620203346466"></p>
+<p><img src="/2022/06/19/mmcv/image-20220620203652989.png" alt="image-20220620203652989"></p>
+<p><img src="/2022/06/19/mmcv/image-20220620204435092.png" alt="image-20220620204435092"></p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://openmmlab.feishu.cn/file/boxcnxBOiTaNOjPojDihE9vBDRd">Config&amp;Registry背后的故事ppt</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV19Z4y1q7Q5?spm_id_from=444.41.list.card_archive.click&amp;vd_source=1d323c0fb399b7e3d65130870e2e897b">视频讲解</a></p>
+</blockquote>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>CY</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>Permalink:</span>
+                        <span><a href="http://example.com/2022/06/19/mmcv/">http://example.com/2022/06/19/mmcv/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>Do you believe in <strong>DESTINY</strong>?</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/code/"># code</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+            
+            <a class="next" rel="next" href="/2022/06/10/DETR/">DETR</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+
+
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.min.js"></script>
+<div id="gitalk-container"></div>
+<script type="text/javascript">
+      var gitalk = new Gitalk({
+        clientID: '9810f94b2996825e7931',
+        clientSecret: 'c1aee8c436730130e3ad18694d20888a1ee13bce',
+        repo: 'Seperendity.github.io',
+        owner: 'Seperendity',
+        admin: 'Seperendity',
+        id: location.pathname,
+        labels: 'Gitalk'.split(',').filter(l => l),
+        perPage: 10,
+        pagerDirection: 'last',
+        createIssueManually: true,
+        distractionFreeMode: false
+      })
+      gitalk.render('gitalk-container')
+</script>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© CY | 2022 😉 Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a>
+		|
+		<!-- 访客数量 -->
+		
+		  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+<span class="site-uv">
+
+  <i class="iconfont icon-yonghu "></i>
+
+ <i class="busuanzi-value" id="busuanzi_value_site_uv"></i>
+
+</span>&nbsp;
+
+
+
+
+
+<span class="site-pv">
+
+ <i class="iconfont icon-jiaoyinzujifangke "></i>
+
+ <i class="busuanzi-value" id="busuanzi_value_site_pv"></i>
+
+</span>
+
+
+		
+		</span>
+    </div>
+</footer>
+
+<script>
+    $(document).ready(function () {
+
+        var int = setInterval(fixCount, 50);  // 50ms周期检测函数
+        var pvcountOffset = 80000;  // 初始化首次数据
+        var uvcountOffset = 20000;
+
+        function fixCount() {
+            if (document.getElementById("busuanzi_container_site_pv").style.display != "none") {
+                $("#busuanzi_value_site_pv").html(parseInt($("#busuanzi_value_site_pv").html()) + pvcountOffset);
+                clearInterval(int);
+            }
+            if ($("#busuanzi_container_site_pv").css("display") != "none") {
+                $("#busuanzi_value_site_uv").html(parseInt($("#busuanzi_value_site_uv").html()) + uvcountOffset); // 加上初始数据 
+                clearInterval(int); // 停止检测
+            }
+        }
+    });
+</script>
+
+    </div>
+	
+	<!-- 搜索功能 -->
+	<!-- Chic/layout.ejs -->
+	<div id="u-search">
+		<div class="modal">
+			<div class="modal-header">
+				<div class="container">
+					<form id="u-search-modal-form" class="u-search-modal-form">
+						<button type="submit" class="form-submit-btn">
+							<img src="/image/search.png" class="search-btn-img" />
+						</button>
+						<input placeholder="搜索内容..." class="form-input" id="modal-form-input">
+					</form>
+					<a class="modal-close">x</a>
+				</div>
+				<div class="search-loading">
+					<div class="search-loading-bar"></div>
+				</div>
+			</div>
+			<div class="modal-body">
+			</div>
+		</div>
+		<div class="modal-overlay"></div>
+	</div>
+</body>
+<script>
+!
+function() {
+    function n(n, e, t) {
+        return n.getAttribute(e) || t
+    }
+    function e(n) {
+        return document.getElementsByTagName(n)
+    }
+    function t() {
+        var t = e("script"),
+        o = t.length,
+        i = t[o - 1];
+        return {
+            l: o,
+            z: n(i, "zIndex", -1),     //置于主页面背后
+            o: n(i, "opacity", .5),     //线条透明度
+            c: n(i, "color", "0,0,0"),  //线条颜色
+            n: n(i, "count", 100)    //线条数量
+        }
+    }
+    function o() {
+        a = m.width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth,
+        c = m.height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
+    }
+    function i() {
+        r.clearRect(0, 0, a, c);
+        var n, e, t, o, m, l;
+        s.forEach(function(i, x) {
+            for (i.x += i.xa, i.y += i.ya, i.xa *= i.x > a || i.x < 0 ? -1 : 1, i.ya *= i.y > c || i.y < 0 ? -1 : 1, r.fillRect(i.x - .5, i.y - .5, 1, 1), e = x + 1; e < u.length; e++) n = u[e],
+            null !== n.x && null !== n.y && (o = i.x - n.x, m = i.y - n.y, l = o * o + m * m, l < n.max && (n === y && l >= n.max / 2 && (i.x -= .03 * o, i.y -= .03 * m), t = (n.max - l) / n.max, r.beginPath(), r.lineWidth = t / 2, r.strokeStyle = "rgba(" + d.c + "," + (t + .2) + ")", r.moveTo(i.x, i.y), r.lineTo(n.x, n.y), r.stroke()))
+        }),
+        x(i)
+    }
+    var a, c, u, m = document.createElement("canvas"),
+    d = t(),
+    l = "c_n" + d.l,
+    r = m.getContext("2d"),
+    x = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
+    function(n) {
+        window.setTimeout(n, 1e3 / 45)
+    },
+    w = Math.random,
+    y = {
+        x: null,
+        y: null,
+        max: 2e4
+    };
+    m.id = l,
+    m.style.cssText = "position:fixed;top:0;left:0;z-index:" + d.z + ";opacity:" + d.o,
+    e("body")[0].appendChild(m),
+    o(),
+    window.onresize = o,
+    window.onmousemove = function(n) {
+        n = n || window.event,
+        y.x = n.clientX,
+        y.y = n.clientY
+    },
+    window.onmouseout = function() {
+        y.x = null,
+        y.y = null
+    };
+    for (var s = [], f = 0; d.n > f; f++) {
+        var h = w() * a,
+        g = w() * c,
+        v = 2 * w() - 1,
+        p = 2 * w() - 1;
+        s.push({
+            x: h,
+            y: g,
+            xa: v,
+            ya: p,
+            max: 6e3
+        })
+    }
+    u = s.concat([y]),
+    setTimeout(function() {
+        i()
+    },
+    100)
+} ();
+</script>
+
+<script type='text/javascript' id='clustrmaps' src='//cdn.clustrmaps.com/map_v2.js?cl=ffffff&w=350&t=m&d=1NqKKNlM62oDkLYA7mQMmVg49mUH_Ib-6MkRgvd04o8&co=2d78ad&cmo=ffc253&cmn=ff5353&ct=ffffff'></script>
+
+</html>
