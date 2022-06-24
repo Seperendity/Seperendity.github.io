@@ -1,5 +1,0 @@
----
-title: about
-type: about
-date: 2022-03-28 15:09:17
----
