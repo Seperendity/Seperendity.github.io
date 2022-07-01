@@ -13,7 +13,7 @@
 
 
 
-<title>tag | Hexo</title>
+<title>How to read | Hexo</title>
 
 
 
@@ -364,28 +364,266 @@
     }
 </script>
             <div class="main">
-                
-
-    <div class="container">
-        <div class="post-wrap tags">
-            <h2 class="post-title">-&nbsp;Tag Cloud&nbsp;-</h2>
-
-            <div class="tag-cloud-tags">
-                
-                    <a href="/tags/paper/">paper<small>(5)</small></a>
-                
-                    <a href="/tags/literature/">literature<small>(1)</small></a>
-                
-                    <a href="/tags/code/">code<small>(4)</small></a>
-                
-                    <a href="/tags/image-processing/">image processing<small>(1)</small></a>
-                
-                    <a href="/tags/torch/">torch<small>(1)</small></a>
-                
-            </div>
-        </div>
+                <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
     </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
 
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">How to read</h1>
+            
+                <div class="post-meta">
+                    
+                        👨‍🎓Author: <a itemprop="author" rel="author" href="/">CY</a>
+                    
+
+                    
+                        <span class="post-time">
+                        📅Date: <a href="#">July 1, 2022&nbsp;&nbsp;10:59:27</a>
+                        </span>
+                    
+                    
+					
+					
+						<span class="post-count">
+					📑Words:
+						<a href="">567</a>
+						</span>
+					
+					
+						<span class="post-count">
+					⏱️Time:
+						<a href="">1min</a>  
+						</span>
+					
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <blockquote>
+<p>An introduction to research paper reading</p>
+</blockquote>
+<h1 id="批判阅读"><a class="markdownIt-Anchor" href="#批判阅读"></a> 批判阅读</h1>
+<ul>
+<li>如果作者是尝试解决某个问题
+<ul>
+<li>那他们要解决的这个问题是正确的么？</li>
+<li>有没有更简单的解法？</li>
+<li>答案有什么局限性？</li>
+</ul>
+</li>
+<li>如果作者呈现数据
+<ul>
+<li>他们是否有正确的数据来支撑论点？</li>
+<li>他们是否以正确的方式来组织这些数据？</li>
+<li>他们是否以合理的方式来解释了这些数据？</li>
+<li>是否还有其他更具说服力的数据集？</li>
+</ul>
+</li>
+<li>作者的假设合理吗？
+<ul>
+<li>逻辑清晰且公正吗？</li>
+<li>理由有没有漏洞？</li>
+</ul>
+</li>
+</ul>
+<h1 id="创造性阅读"><a class="markdownIt-Anchor" href="#创造性阅读"></a> 创造性阅读</h1>
+<ul>
+<li>文章还有哪些点是作者没想到的</li>
+<li>我是否可以对那些地方进行改进，从而提升效果</li>
+<li>能不能把这篇论文和其他的论文关联起来，从而产生新的想法，可以支撑下一阶段的研究</li>
+</ul>
+<p>如果真正想理解论文，可以写一个摘要，最好做一个报告。当把东西写下来或者说出来，才能说明我们真正理解了。</p>
+<h1 id="问题清单"><a class="markdownIt-Anchor" href="#问题清单"></a> 问题清单</h1>
+<ul>
+<li>
+<p>论文的核心观点是什么？</p>
+</li>
+<li>
+<p>主要的局限性是什么？</p>
+</li>
+<li>
+<p>代码和数据是不是可用？</p>
+</li>
+<li>
+<p>这是一个好的想法吗？是否违反直觉？</p>
+</li>
+<li>
+<p>论文的贡献是否有意义？</p>
+</li>
+<li>
+<p>论文中的实验是否足够好？还可以调优吗？</p>
+</li>
+<li>
+<p>有没有错过什么相关论文么？</p>
+</li>
+<li>
+<p>对我的工作和产出有何帮助么？</p>
+</li>
+<li>
+<p>这是一篇值得关注的论文么？</p>
+</li>
+<li>
+<p>其他的人对这篇论文有何看法呢？</p>
+</li>
+<li>
+<p>这个研究领域的领头人是谁呢？</p>
+</li>
+<li>
+<p>如果有机会见到作者，我应该问作者什么问题？</p>
+</li>
+</ul>
+<blockquote>
+<p>或许你永远不知道你以前读过的书能在什么时候能够派上用场，但请保持阅读，因为阅读的过程也是在你大脑中建立认知的过程。</p>
+<p>深度阅读论文，要敢于对论文质疑，质疑论文作者的研究方法、思路、技巧。还要设身处地去想：如果我来写这篇论文，我能用什么方法。 --Harry</p>
+</blockquote>
+<p><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1df4y1m74k?spm_id_from=333.880.my_history.page.click&amp;vd_source=1d323c0fb399b7e3d65130870e2e897b">沈向洋博士在全球创新学院（GIX）进行的直播“You are how you read”视频回放</a></p>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>CY</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>Permalink:</span>
+                        <span><a href="http://example.com/2022/07/01/Read/">http://example.com/2022/07/01/Read/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>Do you believe in <strong>DESTINY</strong>?</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/paper/"># paper</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+            
+            <a class="next" rel="next" href="/2022/06/23/EdgeNext/">EdgeNext</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+
+
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.min.js"></script>
+<div id="gitalk-container"></div>
+<script type="text/javascript">
+      var gitalk = new Gitalk({
+        clientID: '9810f94b2996825e7931',
+        clientSecret: 'c1aee8c436730130e3ad18694d20888a1ee13bce',
+        repo: 'Seperendity.github.io',
+        owner: 'Seperendity',
+        admin: 'Seperendity',
+        id: location.pathname,
+        labels: 'Gitalk'.split(',').filter(l => l),
+        perPage: 10,
+        pagerDirection: 'last',
+        createIssueManually: true,
+        distractionFreeMode: false
+      })
+      gitalk.render('gitalk-container')
+</script>
 
             </div>
             <footer id="footer" class="footer">
