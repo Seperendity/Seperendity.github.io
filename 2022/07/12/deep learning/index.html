@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="CY">
+
+
+
+
+
+<title>Computer vision review：1-4 | Hexo</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+    <link rel="stylesheet" href="/../fonts/iconfont2/iconfont.css">
+    
+    <link rel="stylesheet" href="/../fonts/iconfont3/iconfont.css">
+    
+    <link rel="stylesheet" href="/../fonts/iconfont4/iconfont.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+    <script src="/js/jquery-3.6.0.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+<!-- 搜索的部分 -->
+
+
+
+    <script>
+    function searchToggle() {
+        const width = $(document.body).width()
+        if(width > 479) {
+            return;
+        }
+        const search = $('.search');
+		const searchForm = $('.form-search')
+		const menuToggle = $('.menu-toggle');
+		const title = $('.navbar-header-title ');
+
+        if(!search.hasClass("mobile-search")) {
+            search.addClass("mobile-search");
+			menuToggle.addClass("open-search")
+			title.addClass("mobile-title-hidden")
+        } else {
+            search.removeClass("mobile-search");
+			menuToggle.removeClass("open-search")
+			// title.css({visibility: 'visible'})
+			title.removeClass("mobile-title-hidden")
+        } 
+    }
+
+    function searchToggle() {
+        const width = $(document.body).width()
+        if(width > 479) {
+            return;
+        }
+        const search = $('.search');
+        const searchForm = $('.form-search');
+        const menuToggle = $('.menu-toggle');
+        const title = $('.navbar-header-title ');
+
+        if(!search.hasClass("mobile-search")) {
+            search.addClass("mobile-search");
+            menuToggle.addClass("open-search")
+            title.addClass("mobile-title-hidden")
+        } else {
+            search.removeClass("mobile-search");
+            menuToggle.removeClass("open-search")
+            // title.css({visibility: 'visible'})
+            title.removeClass("mobile-title-hidden")
+        } 
+    }
+
+
+
+    function search(searchInputEl, formEl, flag) {
+        const path = "/" + "search.json"; // 可以在public 下查看这个search.json
+        $(formEl).submit(function(e){
+            e.preventDefault();
+            let target = null
+            if(searchInputEl == null) {
+                const screenWidth = $(document.body).width();
+                target = screenWidth > 479 ? $('#pc-search-input') : $('#mobile-search-input');
+                console.log(target);
+            } else {
+                target = $(searchInputEl)
+            }
+
+            if(!flag && target.val() === '') {
+                return ;
+            }
+
+            $("#u-search").fadeIn(500, function() {
+                $("body > .wrapper").addClass("modal-active");
+
+                $.ajax({
+                    url: path,
+                    dataType: "json",
+                    beforeSend: function (xhr) {
+                        $input = target.val();
+                        $(".form-input").val($input);
+                        const loadingBar = $('.search-loading-bar') 
+                        loadingBar.css({
+                            width:'100%',
+                            display: 'block'
+                        });
+                    },
+                    success: function( datas ) {
+                        console.log(datas);
+                        const $resultPanel = $(".modal-body")[0];
+                        let str = `<ul class="modal-results">`;
+                        var keywords = $(".form-input").val().trim().toLowerCase().split(/[\s\-]+/);
+                        $resultPanel.innerHTML = "";
+                        let hasResult = false
+                        let text = `<div class="no-result">找不到与关键词相关的内容....</div>`;
+
+                        if ($(".form-input").val().trim().length <= 0) {
+                            // 没有结果
+                            $resultPanel.innerHTML = text;
+                            return;
+                        }
+                        datas.forEach(function (data, index) {
+                            var isMatch = true;
+                            if (!data.title || data.title.trim() === '') {
+                                data.title = "Untitled";
+                            }
+                            var data_title = data.title.trim().toLowerCase();
+                            var data_content = data.content && data.content.trim().replace(/<[^>]+>/g, "").toLowerCase() || '';
+                            var data_url = data.url;
+                            var index_title = -1;
+                            var index_content = -1;
+                            var first_occur = -1;
+                            // only match artiles with not empty contents
+                            if (data_content !== '') {
+                                keywords.forEach(function (keyword, i) {
+                                    index_title = data_title.indexOf(keyword);
+                                    index_content = data_content.indexOf(keyword);
+
+                                    if (index_title < 0 && index_content < 0) {
+                                        isMatch = false;
+                                    } else {
+                                        hasResult = true
+                                        if (index_content < 0) {
+                                            index_content = 0;
+                                        }
+                                        if (i == 0) {
+                                            first_occur = index_content;
+                                        }
+                                    }
+                                });
+                            } else {
+                                isMatch = false;
+                            }
+                            // show search results
+                            if (isMatch) {
+                                str += `<li class='result-item'><a href='${data_url}' class='result-item-detail'> <span class="title">${data_title}</span>`;
+                                var content = data.content.trim().replace(/<[^>]+>/g, "");
+                                if (first_occur >= 0) {
+                                    // cut out 200 characters
+                                    var start = first_occur - 40;
+                                    var end = first_occur + 160;
+
+                                    if (start < 0) {
+                                        start = 0;
+                                    }
+
+                                    if (start == 0) {
+                                        end = 200;
+                                    }
+
+                                    if (end > content.length) {
+                                        end = content.length;
+                                    }
+
+                                    var match_content = content.substring(start, end);
+
+                                    // highlight all keywords
+                                    keywords.forEach(function (keyword) {
+                                        var regS = new RegExp(keyword, "gi");
+                                        match_content = match_content.replace(regS, `<em class="search-keyword">${keyword}</em>`);
+                                    });
+
+                                    str += `<span class="content"> ${match_content} ...</span></a>`;
+                                }
+                                str += "</li>";
+                            }
+                        });
+                        str += "</ul>";
+                        if(hasResult) {
+                            $resultPanel.innerHTML = str;
+                        } else {
+                            $resultPanel.innerHTML = text;
+                        }
+
+                    },
+                    complete: function() {
+                        setTimeout(() => {
+                                const loadingBar = $('.search-loading-bar') 
+                                loadingBar.css({
+                                    width:'0%',
+                                    display: 'none'
+                                });
+                        }, 300)
+                    }
+                });
+            })
+
+        });
+    }
+
+    $(document).ready(function() {
+        $('.modal-close').click(function () { 
+            $("#u-search").fadeOut();
+            $("body > .wrapper").removeClass("modal-active")
+        })
+
+        $('.modal-overlay').click(function() {
+            $("#u-search").fadeOut();
+            $("body > .wrapper").removeClass("modal-active")
+        })
+        search(null, ".form-search", false)
+        search("#u-search-modal-form .form-input", ".u-search-modal-form", true)
+    })
+</script>
+
+<meta name="generator" content="Hexo 6.1.0">
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <!-- div class="navbar-header header-logo"><a href="/">CY&#39;s Blog</a></div -->
+			<div class="navbar-header header-logo"><a href="/"><i class="iconfont icon-zhuye" style="font-size: 1em;"></i>CY&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+				<!-- 这里表示的是pc端搜索框 -->
+				
+				
+    <div class="search ">
+        <div class="search-btn" onClick="searchToggle()">
+            <img src="/image/search.png" class="search-btn-img" />
+        </div>
+        <form class="form-search">
+            <input class="input" placeholder="点此搜索" autocomplete="off" id="pc-search-input"/>
+        </form>
+    </div>
+
+
+                
+                <a class="menu-item" href="/archives">📚Posts</a>
+                
+                <a class="menu-item" href="/category">📁Categories</a>
+                
+                <a class="menu-item" href="/tag">🏷️Tags</a>
+                
+                <a class="menu-item" href="/about">📑About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">CY&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+				<div class="navbar-mobile-right">
+					
+					
+    <div class="search ">
+        <div class="search-btn" onClick="searchToggle()">
+            <img src="/image/search.png" class="search-btn-img" />
+        </div>
+        <form class="form-search">
+            <input class="input" placeholder="点此搜索" autocomplete="off" id="mobile-search-input"/>
+        </form>
+    </div>
+
+
+					<div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+				</div>
+				
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                <a class="menu-item" href="/archives">📚Posts</a>
+                
+                <a class="menu-item" href="/category">📁Categories</a>
+                
+                <a class="menu-item" href="/tag">🏷️Tags</a>
+                
+                <a class="menu-item" href="/about">📑About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">Computer vision review：1-4</h1>
+            
+                <div class="post-meta">
+                    
+                        👨‍🎓Author: <a itemprop="author" rel="author" href="/">CY</a>
+                    
+
+                    
+                        <span class="post-time">
+                        📅Date: <a href="#">July 12, 2022&nbsp;&nbsp;9:49:35</a>
+                        </span>
+                    
+                    
+					
+					
+						<span class="post-count">
+					📑Words:
+						<a href="">3.9k</a>
+						</span>
+					
+					
+						<span class="post-count">
+					⏱️Time:
+						<a href="">14min</a>  
+						</span>
+					
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h1 id="1-人工智能的提出和发展历史"><a class="markdownIt-Anchor" href="#1-人工智能的提出和发展历史"></a> 1. 人工智能的提出和发展历史</h1>
+<h2 id="正式诞生达特茅斯会议1956"><a class="markdownIt-Anchor" href="#正式诞生达特茅斯会议1956"></a> 正式诞生：达特茅斯会议（1956）</h2>
+<h2 id="img-srcdeep-learningimage-20220831133047984png-altimage-20220831133047984-stylezoom50"><a class="markdownIt-Anchor" href="#img-srcdeep-learningimage-20220831133047984png-altimage-20220831133047984-stylezoom50"></a> <img src="/2022/07/12/deep%20learning/image-20220831133047984.png" alt="image-20220831133047984" style="zoom:50%;"></h2>
+<img src="/2022/07/12/deep%20learning/image-20220831133252198.png" alt="image-20220831133252198" style="zoom:50%;">
+<img src="/2022/07/12/deep%20learning/image-20220831133739312.png" alt="image-20220831133739312" style="zoom:50%;">
+<img src="/2022/07/12/deep%20learning/image-20220831134112693.png" alt="image-20220831134112693" style="zoom:50%;">
+<p>![image-20220831134629410](deep learning/image-20220831134629410.png)</p>
+<p>可能并不需要真正定义一个符号系统（代表逻辑推理），引出后来的统计学习方法来做AI的思路（数据：题海战术），1993年后统计学习的本质并未改变。</p>
+<img src="/2022/07/12/deep%20learning/image-20220831135100304.png" alt="image-20220831135100304" style="zoom:50%;">
+<img src="/2022/07/12/deep%20learning/image-20220831135317658.png" alt="image-20220831135317658" style="zoom:50%;">
+<img src="/2022/07/12/deep%20learning/image-20220831135618400.png" alt="image-20220831135618400" style="zoom:50%;">
+<img src="/2022/07/12/deep%20learning/image-20220831140621388.png" alt="image-20220831140621388" style="zoom:50%;">
+<p>如何利用常识？</p>
+<h2 id="11-人工智能的方法论"><a class="markdownIt-Anchor" href="#11-人工智能的方法论"></a> 1.1 人工智能的方法论</h2>
+<p><strong>完全基于概率统计的模型</strong></p>
+<img src="/2022/07/12/deep%20learning/image-20220831151341825.png" alt="image-20220831151341825" style="zoom:50%;">
+<img src="/2022/07/12/deep%20learning/image-20220831152503085.png" alt="image-20220831152503085" style="zoom:45%;">
+<p>手工设计基于人类知识，自主学习基于数据，两者的使用主要取决于处理的任务需要，没有优劣之分。</p>
+<img src="/2022/07/12/deep%20learning/image-20220831153720038.png" alt="image-20220831153720038" style="zoom:50%;">
+<p>**在满足可行性、优越性及必要性的前提下，什么情况使用深度学习的方法：**1、没有现有知识可以直接建模 	2、复杂度过高</p>
+<img src="/2022/07/12/deep%20learning/image-20220831154749551.png" alt="image-20220831154749551" style="zoom:50%;">
+<h1 id="2-计算机视觉"><a class="markdownIt-Anchor" href="#2-计算机视觉"></a> 2. 计算机视觉</h1>
+<h2 id="21-计算机视觉的定义"><a class="markdownIt-Anchor" href="#21-计算机视觉的定义"></a> 2.1 计算机视觉的定义</h2>
+<p>计算机视觉就是处理输入信号或输出信号是图像的问题，计算机图形学更偏向输出信号为图像。</p>
+<p>![image-20220831164227462](deep learning/image-20220831164227462.png)</p>
+<img src="/2022/07/12/deep%20learning/image-20220831165418148.png" alt="image-20220831165418148" style="zoom:50%;">
+<h1 id="22-计算机视觉的发展历史"><a class="markdownIt-Anchor" href="#22-计算机视觉的发展历史"></a> 2.2 计算机视觉的发展历史</h1>
+<p>![image-20220831165745186](deep learning/image-20220831165745186.png)</p>
+<img src="/2022/07/12/deep%20learning/image-20220831170129270.png" alt="image-20220831170129270" style="zoom:50%;">
+<img src="/2022/07/12/deep%20learning/image-20220831170326743.png" alt="image-20220831170326743" style="zoom:50%;">
+<p>![image-20220831171401465](deep learning/image-20220831171401465.png)</p>
+<img src="/2022/07/12/deep%20learning/image-20220831171939117.png" alt="image-20220831171939117" style="zoom:50%;">
+<p>![image-20220831172624736](deep learning/image-20220831172624736.png)</p>
+<img src="/2022/07/12/deep%20learning/image-20220831183900453.png" alt="image-20220831183900453" style="zoom:50%;">
+<p>**小结：**计算机视觉是人工智能的一个分支。由于图像的存储和处理需要消耗更多资源，计算机视觉的发展略微滞后于人工智能，但也同样精彩。计算机视觉的发展历史，是手工特征和神经网络（连结主义）不断角力的过程，而时下流行的深度学习正是连结主义的最强武器。同时，计算机视觉的发展还是时代的产物，受到大算力和大数据的极大推动。</p>
+<h2 id="23计算机视觉的典型问题和应用"><a class="markdownIt-Anchor" href="#23计算机视觉的典型问题和应用"></a> 2.3计算机视觉的典型问题和应用</h2>
+<p>![image-20220831191725817](deep learning/image-20220831191725817.png)</p>
+<p>摄像机标定：摄像机的内外参数在空间中体现如何，拍摄的物体有多远、多大。</p>
+<p>![image-20220831192458079](deep learning/image-20220831192458079.png)</p>
+<p>密集表示：对人的身体进行切片，每一片对应身体的特定部位</p>
+<p>![image-20220831195928462](deep learning/image-20220831195928462.png)</p>
+<h2 id="24-计算机视觉的现状和挑战"><a class="markdownIt-Anchor" href="#24-计算机视觉的现状和挑战"></a> 2.4 计算机视觉的现状和挑战</h2>
+<p>![image-20220831202536257](deep learning/image-20220831202536257.png)</p>
+<p>![image-20220831204300503](deep learning/image-20220831204300503.png)</p>
+<p>**长尾分布：**少数类别有大部分数据，而多数类别只有小部分数据。往往会对头部数据过拟合，从而在预测时忽略尾部的类别。长尾效应无法通过指标体现，任何测试集都有自身的局限性。缺乏常识知识</p>
+<p>![image-20220831205329626](deep learning/image-20220831205329626.png)</p>
+<img src="/2022/07/12/deep%20learning/image-20220831205958303.png" alt="image-20220831205958303" style="zoom:50%;">
+<img src="/2022/07/12/deep%20learning/image-20220831210241335.png" alt="image-20220831210241335" style="zoom:50%;">
+<p>某种指标在任务层面的过拟合难以避免</p>
+<img src="/2022/07/12/deep%20learning/image-20220831210754916.png" alt="image-20220831210754916" style="zoom:50%;">
+<p>![image-20220831211008729](deep learning/image-20220831211008729.png)</p>
+<p>![image-20220831211220550](deep learning/image-20220831211220550.png)</p>
+<h2 id="25-计算机视觉与人工智能其他领域的联系"><a class="markdownIt-Anchor" href="#25-计算机视觉与人工智能其他领域的联系"></a> 2.5 计算机视觉与人工智能其他领域的联系</h2>
+<p>![image-20220831211816045](deep learning/image-20220831211816045.png)</p>
+<p>本节列举了：与计算机视觉互利的机器学习理论，与其互反的计算机图形学，以及与其互补的自然语言处理。未来可以从图像信号采样、标注、学习等方面推进。</p>
+<h1 id="统计学习基础"><a class="markdownIt-Anchor" href="#统计学习基础"></a> 统计学习基础</h1>
+<h2 id="31-统计学习的基本概念"><a class="markdownIt-Anchor" href="#31-统计学习的基本概念"></a> 3.1 统计学习的基本概念</h2>
+<p>这一小节，主要讲述统计学习的基础知识。作者通过三个典型案例，即一维拟合问题、图像分类问题、游戏策略问题，讲述统计学习的通用流程和基本概念。<strong>统计学习方法本质上是求解概率模型</strong>，因而可以使用贝叶斯定理进行推导，并且<strong>从概率角度定义生成式模型和判别式模型</strong>。</p>
+<img src="/2022/07/12/deep%20learning/image-20220901095624670.png" alt="image-20220901095624670" style="zoom:50%;">
+<img src="/2022/07/12/deep%20learning/image-20220901100326862.png" alt="image-20220901100326862" style="zoom:50%;">
+<p>![image-20220901100815657](deep learning/image-20220901100815657.png)</p>
+<p>![image-20220901101503538](deep learning/image-20220901101503538.png)</p>
+<p><strong>Note：<strong>为什么不定义</strong>一个</strong>参数来而使用<strong>十个</strong>参数来做这件事？</p>
+<p><strong>补充说明：</strong></p>
+<ul>
+<li>
+<p>数据分布（域）：决定了问题的难度甚至可行性，数据分布会影响评价指标、模型设计和优化。</p>
+</li>
+<li>
+<p>评价指标：决定了算法的好坏，在不均匀甚至长尾分布的数据上，不同的评价指标会导致截然不同的结果。长尾分布的数据虽少，但往往是决定算法是否可靠的关键。<strong>没有完美的评价指标，指标随着任务的需求而变化</strong>。</p>
+</li>
+<li>
+<p>模型复杂度和参数：解决同一问题的模型，可以有不同的复杂度（最近邻方法、线性回归法、CNN）。超参数是一种强先验，体现着人类对特定问题的理解。</p>
+</li>
+<li>
+<p>优化过程中的挑战：实际问题中，数据和参数的维度过高（不同维度重要性差别很大）；过拟合现象（把握合适的度非常困难）</p>
+</li>
+</ul>
+<img src="/2022/07/12/deep%20learning/image-20220901111958019.png" alt="image-20220901111958019" style="zoom:50%;">
+<img src="/2022/07/12/deep%20learning/image-20220901112510039.png" alt="image-20220901112510039" style="zoom:50%;">
+<p>概率模型：统计学习一般基于概率论和统计，<strong>从数据分布的假设出发</strong>，利用贝叶斯定理，推出优化目标。</p>
+<img src="/2022/07/12/deep%20learning/image-20220901150044858.png" alt="image-20220901150044858" style="zoom:50%;">
+<p>其中求导过程两边取对数，参数只有一个其他均视为常数。</p>
+<img src="/2022/07/12/deep%20learning/image-20220901151430449.png" alt="image-20220901151430449" style="zoom:50%;">
+<p><strong>L1范数与损失函数的等高面相切的部分更有可能在坐标轴上，因此L1范数会使参数更稀疏？</strong></p>
+<img src="/2022/07/12/deep%20learning/image-20220901152038277.png" alt="image-20220901152038277" style="zoom:50%;">
+<img src="/2022/07/12/deep%20learning/image-20220901152923625.png" alt="image-20220901152923625" style="zoom:50%;">
+<h2 id="32-最近邻法和线性回归"><a class="markdownIt-Anchor" href="#32-最近邻法和线性回归"></a> 3.2 最近邻法和线性回归</h2>
+<p>在这一小节，作者主要讲述统计学习中两个最基础的方法，即最近邻法和线性回归法。最近邻法虽然简单直观，但由于缺乏参数的辅助，在高维空间中不易推广。引入参数后，最简单的模型是线性回归，它不仅具有解析解，而且能够自由地控制模型复杂度。这两种模型各有利弊，共同构成了统计学习的奠基部分。</p>
+<img src="/2022/07/12/deep%20learning/image-20220901204713297.png" alt="image-20220901204713297" style="zoom:50%;">
+<img src="/2022/07/12/deep%20learning/image-20220901205459359.png" alt="image-20220901205459359" style="zoom:50%;">
+<p>最后一句不是很理解，如何推导</p>
+<img src="/2022/07/12/deep%20learning/image-20220901211226620.png" alt="image-20220901211226620" style="zoom:50%;">
+<img src="/2022/07/12/deep%20learning/image-20220901214308267.png" alt="image-20220901214308267" style="zoom:50%;">
+<p>直观理解维度诅咒的例子：d维空间中将一个单位球半径为1减为0.99，那么减少了多少体积？体积与半径d次方成正比，即d很大，体积几乎为0。高维空间中的几乎所有的点，如果在体积中均匀采样的话，几乎所有点都位于球面的附近。</p>
+<img src="/2022/07/12/deep%20learning/image-20220901220812955.png" alt="image-20220901220812955" style="zoom:50%;">
+<p><strong>最近邻法无法判断不同特征的重要程度，每个位置的权重都是一样的，无法学习特征的重要性。将数据投影到更高效的空间中，通过学习调节参数。</strong></p>
+<img src="/2022/07/12/deep%20learning/image-20220901222628377.png" alt="image-20220901222628377" style="zoom:50%;">
+<img src="/2022/07/12/deep%20learning/image-20220902101227171.png" alt="image-20220902101227171" style="zoom:50%;">
+<p>此处的线性反映在求导后<strong>可变参数</strong>都是一次的</p>
+<img src="/2022/07/12/deep%20learning/image-20220902110511451.png" alt="image-20220902110511451" style="zoom:50%;">
+<p>多项式的次数L是一个超参数，在事先不知道目标函数时，多采用增大特征集的方式来提高拟合效果，过大会过拟合。带参模型的线性回归方法优于无参的最近邻法。</p>
+<img src="/2022/07/12/deep%20learning/image-20220902113500770.png" alt="image-20220902113500770" style="zoom:50%;">
+<p>**为什么不使用一维的值作为函数值？**预测的值在语义空间上没有连续性，无法充当分类结果。希望的y应该两两类别之间的距离一样？为什么需要让两两类别之间的距离一样？存疑</p>
+<p>是否使用one-hot编码取决于离散特征的取值之间有没有大小的意义，分类任务不同类别的值没有大小的意义。对于每一个特征，如果它有m个可能值，那么经过独热编码后，就变成了m个二元特征，并且，这些特征互斥，每次只有一个激活。因此，数据会变成稀疏的。使用one-hot编码，将离散特征的取值扩展到了欧式空间，离散特征的某个取值就对应欧式空间的某个点。将离散型特征使用one-hot编码，<strong>会让特征之间的距离计算更加合理</strong>。</p>
+<img src="/2022/07/12/deep%20learning/image-20220902154338475.png" alt="image-20220902154338475" style="zoom:50%;">
+<p>无参的最近邻法效果比线性回归法更好，分析现象产生的原因。</p>
+<p>最近邻法中每一个点控制了其附近的一块区域，而线性回归法在整个空间中划分。哪种方法合理呢？不是说有参数就好，在这种情况下，最近邻法虽然没有参数却可以更好的适应空间的性质。实验结果表明高维空间上让每个点控制一块区域比在整个空间上划线效果更好，推出参数不一定总能带来精度上的增益，更本质的是空间的复杂度不允许我们使用线性的分界面来做，因此模型虽然有参数了，但模型的设计还要符合实际的情况。</p>
+<p><strong>此处可以仔细思考作者的思考过程是如何针对两种方法效果的差异，推导出结论的。</strong></p>
+<img src="/2022/07/12/deep%20learning/image-20220902160836184.png" alt="image-20220902160836184" style="zoom:50%;">
+<h2 id="33-降维方法和统计学习三要素"><a class="markdownIt-Anchor" href="#33-降维方法和统计学习三要素"></a> 3.3 降维方法和统计学习三要素</h2>
+<p>在这一小节，作者主要讲述降维方法，并据此引出统计学习的三个基本要素。原始的最近邻法和线性回归法都很难扩展到高维数据中，其主要原因是维度诅咒的存在。统计学习方法可以通过降维缓解这一问题，而降维的**本质是将数据分布等信息存储于模型参数中，从而达到增加信息熵的目的。**按照这种思路，统计学习的三要素可以确定为数据、模型、算力，而其他重要的元素与三要素之间有着密切的联系。</p>
+<img src="/2022/07/12/deep%20learning/image-20220902165450415.png" alt="image-20220902165450415">
+<p>![image-20220902165553862](deep learning/image-20220902165553862.png)</p>
+<p>![image-20220902165656676](deep learning/image-20220902165656676.png)</p>
+<p>有没有方法可以在考虑语义监督的同时引入非线性呢？</p>
+<p>![image-20220902171240891](deep learning/image-20220902171240891.png)</p>
+<p>两层神经网络可以视为主成分分析的改进</p>
+<p>其他著名降维方法：自编码机。利用降维后恢复原数据的方式，无监督地学习数据内在分布。变分自编码机，使得压缩后的数据满足某种特定分布，从而允许通过采样来生成高维数据。</p>
+<p>![image-20220902192818009](deep learning/image-20220902192818009.png)</p>
+<p>相对关系的具体阐述见[A]，降维后数据之间的相对关系保留的很好。t-SNE是通过各种近似的方法优化，所以复杂度高；而PCA是个迭代过程使用矩阵运算即可。</p>
+<p>![image-20220902193744960](deep learning/image-20220902193744960.png)</p>
+<p>![image-20220902200402833](deep learning/image-20220902200402833.png)</p>
+<p>![image-20220902201818623](deep learning/image-20220902201818623.png)</p>
+<h2 id="34-模型优化的欠拟合和过拟合"><a class="markdownIt-Anchor" href="#34-模型优化的欠拟合和过拟合"></a> 3.4 模型优化的欠拟合和过拟合</h2>
+<p>在这一小节，作者主要讲述模型优化的全景以及其中最常见的困难，即欠拟合和过拟合。模型优化是一个系统性工程，而当特征空间性质复杂、训练数据减少时，就很容易出现欠拟合和过拟合的问题。以一维拟合问题为例，可以观察到数据量和模型复杂度对于拟合程度的影响。<strong>最后，将拟合程度归结为从偏差和方差的平衡，并且得到结论：没有最好的模型，只有最合适的模型。</strong></p>
+<p>![image-20220903094431285](deep learning/image-20220903094431285.png)</p>
+<p>![image-20220903101525709](deep learning/image-20220903101525709.png)</p>
+<p>![image-20220903103151604](deep learning/image-20220903103151604.png)</p>
+<p><strong>多项式系数的大小可以作为模型是否过拟合的指标 ，正则化实际是约束了多项式系数。</strong></p>
+<p>![image-20220903104834449](deep learning/image-20220903104834449.png)</p>
+<p>![image-20220903111042745](deep learning/image-20220903111042745.png)</p>
+<p>![image-20220903111106516](deep learning/image-20220903111106516.png)</p>
+<h2 id="35两个经典的统计学习范式"><a class="markdownIt-Anchor" href="#35两个经典的统计学习范式"></a> 3.5两个经典的统计学习范式</h2>
+<p>![image-20220903111612237](deep learning/image-20220903111612237.png)</p>
+<p>![image-20220903112253774](deep learning/image-20220903112253774.png)</p>
+<p>![image-20220903112512750](deep learning/image-20220903112512750.png)</p>
+<p>![image-20220903112717413](deep learning/image-20220903112717413.png)</p>
+<h1 id="4-视觉模型设计的基本原则"><a class="markdownIt-Anchor" href="#4-视觉模型设计的基本原则"></a> 4. 视觉模型设计的基本原则</h1>
+<p>在这一章，作者首先分析视觉信号的重要性质，并由此引出统计学习方法需要满足的三大基本原则。它们之间的对应关系是：视觉信号的语义对应关系复杂——层次性原则；视觉信号的语义信息密度低——最小描述原则；视觉信号连续变化且边界模糊——分散表示原则。</p>
+<h2 id="41-层次性原则"><a class="markdownIt-Anchor" href="#41-层次性原则"></a> 4.1 层次性原则</h2>
+<p>在这一小节，作者主要讲述第一个基本原则：层次性原则。图像信号的基本单元是像素，而像素和语义之间存在着巨大的语义鸿沟。通过简单的或者手工定义的函数，很难跨越语义鸿沟；往往需要使用分步设计的思想，构造基本操作的复合函数，来实现复杂映射关系。层次性原则催生了局部设计理念，也是深度学习的重要基石。</p>
+<p>![image-20220903144036642](deep learning/image-20220903144036642.png)</p>
+<p>![image-20220903144900051](deep learning/image-20220903144900051.png)</p>
+<p>性质2：图像的语义信息密度低</p>
+<p>![image-20220903150040371](deep learning/image-20220903150040371.png)</p>
+<p>![image-20220903150903379](deep learning/image-20220903150903379.png)</p>
+<p>![image-20220903151954608](deep learning/image-20220903151954608.png)</p>
+<p>![image-20220903152347061](deep learning/image-20220903152347061.png)</p>
+<p>了解词袋模型的局限性，对理解当前的深度学习方法是很有帮助的</p>
+<p>![image-20220903152323716](deep learning/image-20220903152323716.png)</p>
+<p>![image-20220903153440107](deep learning/image-20220903153440107.png)</p>
+<p>![image-20220903154653293](deep learning/image-20220903154653293.png)</p>
+<p>![image-20220903155442632](deep learning/image-20220903155442632.png)</p>
+<p>![image-20220903160129630](deep learning/image-20220903160129630.png)</p>
+<p>这里作者再次强调了深度学习和强化学习今后一定能好的联系在一起，处理更复杂的问题。</p>
+<h2 id="42最小描述原则"><a class="markdownIt-Anchor" href="#42最小描述原则"></a> 4.2最小描述原则</h2>
+<p>在这一小节，作者主要讲述第二个基本原则：最小描述原则。图像信号的语义密度低，因此从统计学习角度看，从中抽取紧凑特征并且基于低维特征学习语义，能够降低模型的结构风险。最小描述原则在一系列统计学习模型中都有所体现。<strong>从一般意义上说，它所追求的目标，是压缩率和恢复率间的权衡，但是如何衡量恢复效果，是一个触及视觉本质的难题。</strong></p>
+<p>![image-20220903195922075](deep learning/image-20220903195922075.png)</p>
+<p>![image-20220903200929868](deep learning/image-20220903200929868.png)</p>
+<p>![image-20220903200951677](deep learning/image-20220903200951677.png)</p>
+<p>![image-20220903201606691](deep learning/image-20220903201606691.png)</p>
+<p>压缩不够会过拟合，压缩过了又会丢失重要维度信息。</p>
+<p>![image-20220903201931005](deep learning/image-20220903201931005.png)</p>
+<p>![image-20220903202316881](deep learning/image-20220903202316881.png)</p>
+<p>![image-20220903203053503](deep learning/image-20220903203053503.png)</p>
+<p><strong>最小描述原则的本质是数据的不均匀分布，只有不均匀的分布才能被压缩。</strong></p>
+<p>![image-20220903204112715](deep learning/image-20220903204112715.png)</p>
+<p>![image-20220903204655091](deep learning/image-20220903204655091.png)</p>
+<h2 id="43-分散表示原则"><a class="markdownIt-Anchor" href="#43-分散表示原则"></a> 4.3 分散表示原则</h2>
+<p>在这一小节，作者主要讲述第三个基本原则：分散表示原则。图像信号的域特性很强，因而不同场景的数据间分布差异巨大。分布间的变换通常不完全可控，而域迁移（迁移学习）就是处理不可控变换的有效手段。在深度学习的基础上，域迁移可以通过微调神经网络的参数来实现，而微调的力度则需要根据实际情况来确定。</p>
+<p>![image-20220904153014943](deep learning/image-20220904153014943.png)</p>
+<p>![image-20220904154701746](deep learning/image-20220904154701746.png)</p>
+<p>微调的参数越多，越容易过拟合。</p>
+<p>如何决定模型微调的力度？取决于域间差异、新域数据的多少。</p>
+<p>![image-20220904161232797](deep learning/image-20220904161232797.png)</p>
+<p><strong>图像信号采样与语义的相关性很低，本质上还是缺乏常识</strong></p>
+<h2 id="44-三大原则的结合"><a class="markdownIt-Anchor" href="#44-三大原则的结合"></a> 4.4 三大原则的结合</h2>
+<p>![image-20220904163356690](deep learning/image-20220904163356690.png)</p>
+<p>图像的基本性质决定了我们处理问题的原则，基本原则又催生了具体的解决方案，方案不一定是最好的，但指导原则是相对固定的。</p>
+<p>![image-20220904163807590](deep learning/image-20220904163807590.png)</p>
+<p>区别二中指出了NLP长期领先CV的部分原因</p>
+<p>![image-20220904163940758](deep learning/image-20220904163940758.png)</p>
+<p><strong>问题还在特征的表达上，我们并不知道特征和语义之间的关系，如何使特征和常识、知识联系起来。</strong></p>
+<p>![image-20220904164338781](deep learning/image-20220904164338781.png)</p>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>CY</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>Permalink:</span>
+                        <span><a href="http://example.com/2022/07/12/deep%20learning/">http://example.com/2022/07/12/deep%20learning/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>Do you believe in <strong>DESTINY</strong>?</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/course/"># course</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+            
+            <a class="next" rel="next" href="/2022/07/01/Read/">How to read</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+
+
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.min.js"></script>
+<div id="gitalk-container"></div>
+<script type="text/javascript">
+      var gitalk = new Gitalk({
+        clientID: '9810f94b2996825e7931',
+        clientSecret: 'c1aee8c436730130e3ad18694d20888a1ee13bce',
+        repo: 'Seperendity.github.io',
+        owner: 'Seperendity',
+        admin: 'Seperendity',
+        id: location.pathname,
+        labels: 'Gitalk'.split(',').filter(l => l),
+        perPage: 10,
+        pagerDirection: 'last',
+        createIssueManually: true,
+        distractionFreeMode: false
+      })
+      gitalk.render('gitalk-container')
+</script>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© CY | 2022 😉 Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a>
+		|
+		<!-- 访客数量 -->
+		
+		  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+<span class="site-uv">
+
+  <i class="iconfont icon-yonghu "></i>
+
+ <i class="busuanzi-value" id="busuanzi_value_site_uv"></i>
+
+</span>&nbsp;
+
+
+
+
+
+<span class="site-pv">
+
+ <i class="iconfont icon-jiaoyinzujifangke "></i>
+
+ <i class="busuanzi-value" id="busuanzi_value_site_pv"></i>
+
+</span>
+
+
+		
+		</span>
+    </div>
+</footer>
+
+<script>
+    $(document).ready(function () {
+
+        var int = setInterval(fixCount, 50);  // 50ms周期检测函数
+        var pvcountOffset = 80000;  // 初始化首次数据
+        var uvcountOffset = 20000;
+
+        function fixCount() {
+            if (document.getElementById("busuanzi_container_site_pv").style.display != "none") {
+                $("#busuanzi_value_site_pv").html(parseInt($("#busuanzi_value_site_pv").html()) + pvcountOffset);
+                clearInterval(int);
+            }
+            if ($("#busuanzi_container_site_pv").css("display") != "none") {
+                $("#busuanzi_value_site_uv").html(parseInt($("#busuanzi_value_site_uv").html()) + uvcountOffset); // 加上初始数据 
+                clearInterval(int); // 停止检测
+            }
+        }
+    });
+</script>
+
+    </div>
+	
+	<!-- 搜索功能 -->
+	<!-- Chic/layout.ejs -->
+	<div id="u-search">
+		<div class="modal">
+			<div class="modal-header">
+				<div class="container">
+					<form id="u-search-modal-form" class="u-search-modal-form">
+						<button type="submit" class="form-submit-btn">
+							<img src="/image/search.png" class="search-btn-img" />
+						</button>
+						<input placeholder="搜索内容..." class="form-input" id="modal-form-input">
+					</form>
+					<a class="modal-close">x</a>
+				</div>
+				<div class="search-loading">
+					<div class="search-loading-bar"></div>
+				</div>
+			</div>
+			<div class="modal-body">
+			</div>
+		</div>
+		<div class="modal-overlay"></div>
+	</div>
+</body>
+<script>
+!
+function() {
+    function n(n, e, t) {
+        return n.getAttribute(e) || t
+    }
+    function e(n) {
+        return document.getElementsByTagName(n)
+    }
+    function t() {
+        var t = e("script"),
+        o = t.length,
+        i = t[o - 1];
+        return {
+            l: o,
+            z: n(i, "zIndex", -1),     //置于主页面背后
+            o: n(i, "opacity", .5),     //线条透明度
+            c: n(i, "color", "0,0,0"),  //线条颜色
+            n: n(i, "count", 100)    //线条数量
+        }
+    }
+    function o() {
+        a = m.width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth,
+        c = m.height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
+    }
+    function i() {
+        r.clearRect(0, 0, a, c);
+        var n, e, t, o, m, l;
+        s.forEach(function(i, x) {
+            for (i.x += i.xa, i.y += i.ya, i.xa *= i.x > a || i.x < 0 ? -1 : 1, i.ya *= i.y > c || i.y < 0 ? -1 : 1, r.fillRect(i.x - .5, i.y - .5, 1, 1), e = x + 1; e < u.length; e++) n = u[e],
+            null !== n.x && null !== n.y && (o = i.x - n.x, m = i.y - n.y, l = o * o + m * m, l < n.max && (n === y && l >= n.max / 2 && (i.x -= .03 * o, i.y -= .03 * m), t = (n.max - l) / n.max, r.beginPath(), r.lineWidth = t / 2, r.strokeStyle = "rgba(" + d.c + "," + (t + .2) + ")", r.moveTo(i.x, i.y), r.lineTo(n.x, n.y), r.stroke()))
+        }),
+        x(i)
+    }
+    var a, c, u, m = document.createElement("canvas"),
+    d = t(),
+    l = "c_n" + d.l,
+    r = m.getContext("2d"),
+    x = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
+    function(n) {
+        window.setTimeout(n, 1e3 / 45)
+    },
+    w = Math.random,
+    y = {
+        x: null,
+        y: null,
+        max: 2e4
+    };
+    m.id = l,
+    m.style.cssText = "position:fixed;top:0;left:0;z-index:" + d.z + ";opacity:" + d.o,
+    e("body")[0].appendChild(m),
+    o(),
+    window.onresize = o,
+    window.onmousemove = function(n) {
+        n = n || window.event,
+        y.x = n.clientX,
+        y.y = n.clientY
+    },
+    window.onmouseout = function() {
+        y.x = null,
+        y.y = null
+    };
+    for (var s = [], f = 0; d.n > f; f++) {
+        var h = w() * a,
+        g = w() * c,
+        v = 2 * w() - 1,
+        p = 2 * w() - 1;
+        s.push({
+            x: h,
+            y: g,
+            xa: v,
+            ya: p,
+            max: 6e3
+        })
+    }
+    u = s.concat([y]),
+    setTimeout(function() {
+        i()
+    },
+    100)
+} ();
+</script>
+
+<script type='text/javascript' id='clustrmaps' src='//cdn.clustrmaps.com/map_v2.js?cl=ffffff&w=350&t=m&d=1NqKKNlM62oDkLYA7mQMmVg49mUH_Ib-6MkRgvd04o8&co=2d78ad&cmo=ffc253&cmn=ff5353&ct=ffffff'></script>
+
+</html>
