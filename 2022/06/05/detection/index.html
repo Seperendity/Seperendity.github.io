@@ -450,13 +450,13 @@
 					
 						<span class="post-count">
 					📑Words:
-						<a href="">739</a>
+						<a href="">1.2k</a>
 						</span>
 					
 					
 						<span class="post-count">
 					⏱️Time:
-						<a href="">3min</a>  
+						<a href="">5min</a>  
 						</span>
 					
                 </div>
@@ -464,47 +464,11 @@
         </header>
 
         <div class="post-content">
-            <h1 id="一-数据格式的转换"><a class="markdownIt-Anchor" href="#一-数据格式的转换"></a> 一、数据格式的转换</h1>
-<h2 id="1-coco"><a class="markdownIt-Anchor" href="#1-coco"></a> 1. COCO</h2>
-<ul>
-<li>
-<p><code>coco/</code></p>
-<ul>
-<li><code>annotations/</code>		#该文件下共六种json文件，此处只取两种
-<ul>
-<li><code>instances_train2017.json</code>    # instances：为目标检测与实例分割的标注文件</li>
-<li><code>instances_val2017.json</code></li>
-</ul>
-</li>
-</ul>
-<blockquote>
-<p>json文件主要包含以下几个字段</p>
-<p>{<br>
-“info”: info, # dict 数据集描述</p>
-<p>“licenses”: [license], # list ，内部是dict</p>
-<p>“images”: [image], # 主要包括file_name, height, width，id是图片的唯一标识</p>
-<p>“annotations”: [annotation], # list ，主要包括检测与分割的标注信息</p>
-<p>“categories”: # list ，内部是dict id,  主要字段包括image_id,  category_id,  segmentation,  num_keypoints,  area,  iscrowd,  keypoints，bbox等<br>
-}</p>
-</blockquote>
-<ul>
-<li><code>images/</code>
-<ul>
-<li><code>train2017/</code>
-<ul>
-<li><code>.jpg</code></li>
-</ul>
-</li>
-<li><code>val2017</code>
-<ul>
-<li><code>.jpg</code></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
+            <h1 id="一-数据格式"><a class="markdownIt-Anchor" href="#一-数据格式"></a> 一、数据格式</h1>
+<h2 id="1-ms-coco"><a class="markdownIt-Anchor" href="#1-ms-coco"></a> 1. MS COCO</h2>
+<figure class="highlight markdown"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">├── coco2017: 数据集根目录</span><br><span class="line"><span class="code">     ├── train2017: 所有训练图像文件夹(118287张)</span></span><br><span class="line"><span class="code">     ├── val2017: 所有验证图像文件夹(5000张)</span></span><br><span class="line"><span class="code">     └── annotations: 对应标注文件夹</span></span><br><span class="line"><span class="code">     		  ├── instances_train2017.json: 对应目标检测、分割任务的训练集标注文件</span></span><br><span class="line"><span class="code">     		  ├── instances_val2017.json: 对应目标检测、分割任务的验证集标注文件</span></span><br><span class="line"><span class="code">     		  ├── captions_train2017.json: 对应图像描述的训练集标注文件</span></span><br><span class="line"><span class="code">     		  ├── captions_val2017.json: 对应图像描述的验证集标注文件</span></span><br><span class="line"><span class="code">     		  ├── person_keypoints_train2017.json: 对应人体关键点检测的训练集标注文件</span></span><br><span class="line"><span class="code">     		  └── person_keypoints_val2017.json: 对应人体关键点检测的验证集标注文件夹</span></span><br></pre></td></tr></tbody></table></figure>
+<figure class="highlight python"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 读取jason文件</span></span><br><span class="line"><span class="keyword">import</span> json</span><br><span class="line"></span><br><span class="line">json_path = <span class="string">"/data/coco2017/annotations/instances_val2017.json"</span></span><br><span class="line">json_labels = json.load(<span class="built_in">open</span>(json_path, <span class="string">"r"</span>))</span><br><span class="line"><span class="built_in">print</span>(json_labels[<span class="string">"info"</span>])</span><br><span class="line"></span><br><span class="line"><span class="string">"""</span></span><br><span class="line"><span class="string">json文件主要包含以下五个字段:{</span></span><br><span class="line"><span class="string">"info": {dict: 6}, # dict 数据集描述</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">"licenses": [list: 8], # 内部是dict</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">"images": [list: 5000], # 列表中每个元素都是一个dict,主要包括file_name, height, width，id是图片的唯一标识</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">"annotations": [list: 36781], # 列表元素个数对应数据集中所有标注的目标个数，列表中每个元素都是一个dict对应一个目标的标注信息。包括目标的分割信息（polygons多边形）、目标边界框信息[x,y,width,height]（左上角x,y坐标，以及宽高）、目标面积、对应图像id以及类别id等</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">"categories":  {list：80} ，# 内部是dict ,  主要字段包括类别id、类别名称和所属超类。</span></span><br><span class="line"><span class="string">}</span></span><br><span class="line"><span class="string">"""</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># segmentation字段：polygon以及RLE</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">convert_coco_poly_mask</span>(<span class="params">segmentations, height, width</span>):</span><br><span class="line">    masks = [] </span><br><span class="line">    <span class="keyword">for</span> polygons <span class="keyword">in</span> segmentations:</span><br><span class="line">        rles = coco_mask.frPyObjects(polygons, height, width)</span><br><span class="line">        mask = coco_mask.decode(rles) <span class="comment"># 此处的mask为二值蒙版,背景为0,前景均为1</span></span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">len</span>(mask.shape) &lt; <span class="number">3</span>:</span><br><span class="line">            mask = mask[..., <span class="literal">None</span>]</span><br><span class="line">        mask = torch.as_tensor(mask, dtype= torch.uint8)</span><br><span class="line">        mask = mask.<span class="built_in">any</span>(dim = <span class="number">2</span>) <span class="comment"># 通道方向只要有一个元素为1,即为True</span></span><br><span class="line">        masks.append(mask)</span><br><span class="line">    <span class="keyword">if</span> masks:</span><br><span class="line">        masks = torch.stack(masks, dim = <span class="number">0</span>)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="comment"># 如果mask为空，则说明没有目标，直接返回数值为0的mask</span></span><br><span class="line">        masks = torch.zeros((<span class="number">0</span>, height, width), dtype = torch.uint8)</span><br><span class="line">    <span class="keyword">return</span> masks</span><br></pre></td></tr></tbody></table></figure>
+<p>Note: coco格式下分割标签对应的标注文件为json格式，而voc格式中分割标签对应的是.png的图像。注文件（.png）的每个目标处的像素值是按照xml文件中目标顺序排列的，如xml中有三个目标则对应目标的像素值为1，2，3。</p>
 <h2 id="2-yolo"><a class="markdownIt-Anchor" href="#2-yolo"></a> 2. YOLO</h2>
 <ul>
 <li><code>yolo/</code>
@@ -579,7 +543,7 @@
                 <a class="prev" rel="prev" href="/2022/06/06/VisionGNN/">Vision GNN</a>
             
             
-            <a class="next" rel="next" href="/2022/05/22/Mu/">MUxin</a>
+            <a class="next" rel="next" href="/2022/05/23/yiyu/">yiyu</a>
             
         </section>
 
@@ -613,7 +577,7 @@
             </div>
             <footer id="footer" class="footer">
     <div class="copyright">
-        <span>© CY | 2022 😉 Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a>
+        <span>© CY | 2022 - 2023 😉 Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a>
 		|
 		<!-- 访客数量 -->
 		

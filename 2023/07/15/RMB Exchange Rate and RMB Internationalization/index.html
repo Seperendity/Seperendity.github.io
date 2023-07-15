@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="CY">
+
+
+
+
+
+<title>RMB Exchange Rate and RMB Internationalization | Serendipity</title>
+
+
+
+    <link rel="icon" href="/bitbug_favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+    <link rel="stylesheet" href="/../fonts/iconfont2/iconfont.css">
+    
+    <link rel="stylesheet" href="/../fonts/iconfont3/iconfont.css">
+    
+    <link rel="stylesheet" href="/../fonts/iconfont4/iconfont.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+    <script src="/js/jquery-3.6.0.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+<!-- 搜索的部分 -->
+
+
+
+    <script>
+    function searchToggle() {
+        const width = $(document.body).width()
+        if(width > 479) {
+            return;
+        }
+        const search = $('.search');
+		const searchForm = $('.form-search')
+		const menuToggle = $('.menu-toggle');
+		const title = $('.navbar-header-title ');
+
+        if(!search.hasClass("mobile-search")) {
+            search.addClass("mobile-search");
+			menuToggle.addClass("open-search")
+			title.addClass("mobile-title-hidden")
+        } else {
+            search.removeClass("mobile-search");
+			menuToggle.removeClass("open-search")
+			// title.css({visibility: 'visible'})
+			title.removeClass("mobile-title-hidden")
+        } 
+    }
+
+    function searchToggle() {
+        const width = $(document.body).width()
+        if(width > 479) {
+            return;
+        }
+        const search = $('.search');
+        const searchForm = $('.form-search');
+        const menuToggle = $('.menu-toggle');
+        const title = $('.navbar-header-title ');
+
+        if(!search.hasClass("mobile-search")) {
+            search.addClass("mobile-search");
+            menuToggle.addClass("open-search")
+            title.addClass("mobile-title-hidden")
+        } else {
+            search.removeClass("mobile-search");
+            menuToggle.removeClass("open-search")
+            // title.css({visibility: 'visible'})
+            title.removeClass("mobile-title-hidden")
+        } 
+    }
+
+
+
+    function search(searchInputEl, formEl, flag) {
+        const path = "/" + "search.json"; // 可以在public 下查看这个search.json
+        $(formEl).submit(function(e){
+            e.preventDefault();
+            let target = null
+            if(searchInputEl == null) {
+                const screenWidth = $(document.body).width();
+                target = screenWidth > 479 ? $('#pc-search-input') : $('#mobile-search-input');
+                console.log(target);
+            } else {
+                target = $(searchInputEl)
+            }
+
+            if(!flag && target.val() === '') {
+                return ;
+            }
+
+            $("#u-search").fadeIn(500, function() {
+                $("body > .wrapper").addClass("modal-active");
+
+                $.ajax({
+                    url: path,
+                    dataType: "json",
+                    beforeSend: function (xhr) {
+                        $input = target.val();
+                        $(".form-input").val($input);
+                        const loadingBar = $('.search-loading-bar') 
+                        loadingBar.css({
+                            width:'100%',
+                            display: 'block'
+                        });
+                    },
+                    success: function( datas ) {
+                        console.log(datas);
+                        const $resultPanel = $(".modal-body")[0];
+                        let str = `<ul class="modal-results">`;
+                        var keywords = $(".form-input").val().trim().toLowerCase().split(/[\s\-]+/);
+                        $resultPanel.innerHTML = "";
+                        let hasResult = false
+                        let text = `<div class="no-result">找不到与关键词相关的内容....</div>`;
+
+                        if ($(".form-input").val().trim().length <= 0) {
+                            // 没有结果
+                            $resultPanel.innerHTML = text;
+                            return;
+                        }
+                        datas.forEach(function (data, index) {
+                            var isMatch = true;
+                            if (!data.title || data.title.trim() === '') {
+                                data.title = "Untitled";
+                            }
+                            var data_title = data.title.trim().toLowerCase();
+                            var data_content = data.content && data.content.trim().replace(/<[^>]+>/g, "").toLowerCase() || '';
+                            var data_url = data.url;
+                            var index_title = -1;
+                            var index_content = -1;
+                            var first_occur = -1;
+                            // only match artiles with not empty contents
+                            if (data_content !== '') {
+                                keywords.forEach(function (keyword, i) {
+                                    index_title = data_title.indexOf(keyword);
+                                    index_content = data_content.indexOf(keyword);
+
+                                    if (index_title < 0 && index_content < 0) {
+                                        isMatch = false;
+                                    } else {
+                                        hasResult = true
+                                        if (index_content < 0) {
+                                            index_content = 0;
+                                        }
+                                        if (i == 0) {
+                                            first_occur = index_content;
+                                        }
+                                    }
+                                });
+                            } else {
+                                isMatch = false;
+                            }
+                            // show search results
+                            if (isMatch) {
+                                str += `<li class='result-item'><a href='${data_url}' class='result-item-detail'> <span class="title">${data_title}</span>`;
+                                var content = data.content.trim().replace(/<[^>]+>/g, "");
+                                if (first_occur >= 0) {
+                                    // cut out 200 characters
+                                    var start = first_occur - 40;
+                                    var end = first_occur + 160;
+
+                                    if (start < 0) {
+                                        start = 0;
+                                    }
+
+                                    if (start == 0) {
+                                        end = 200;
+                                    }
+
+                                    if (end > content.length) {
+                                        end = content.length;
+                                    }
+
+                                    var match_content = content.substring(start, end);
+
+                                    // highlight all keywords
+                                    keywords.forEach(function (keyword) {
+                                        var regS = new RegExp(keyword, "gi");
+                                        match_content = match_content.replace(regS, `<em class="search-keyword">${keyword}</em>`);
+                                    });
+
+                                    str += `<span class="content"> ${match_content} ...</span></a>`;
+                                }
+                                str += "</li>";
+                            }
+                        });
+                        str += "</ul>";
+                        if(hasResult) {
+                            $resultPanel.innerHTML = str;
+                        } else {
+                            $resultPanel.innerHTML = text;
+                        }
+
+                    },
+                    complete: function() {
+                        setTimeout(() => {
+                                const loadingBar = $('.search-loading-bar') 
+                                loadingBar.css({
+                                    width:'0%',
+                                    display: 'none'
+                                });
+                        }, 300)
+                    }
+                });
+            })
+
+        });
+    }
+
+    $(document).ready(function() {
+        $('.modal-close').click(function () { 
+            $("#u-search").fadeOut();
+            $("body > .wrapper").removeClass("modal-active")
+        })
+
+        $('.modal-overlay').click(function() {
+            $("#u-search").fadeOut();
+            $("body > .wrapper").removeClass("modal-active")
+        })
+        search(null, ".form-search", false)
+        search("#u-search-modal-form .form-input", ".u-search-modal-form", true)
+    })
+</script>
+
+<meta name="generator" content="Hexo 6.1.0">
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <!-- div class="navbar-header header-logo"><a href="/">CY&#39;s Blog</a></div -->
+			<div class="navbar-header header-logo"><a href="/"><i class="iconfont icon-zhuye" style="font-size: 1em;"></i>CY&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+				<!-- 这里表示的是pc端搜索框 -->
+				
+				
+    <div class="search ">
+        <div class="search-btn" onClick="searchToggle()">
+            <img src="/image/search.png" class="search-btn-img" />
+        </div>
+        <form class="form-search">
+            <input class="input" placeholder="点此搜索" autocomplete="off" id="pc-search-input"/>
+        </form>
+    </div>
+
+
+                
+                <a class="menu-item" href="/archives">📚Posts</a>
+                
+                <a class="menu-item" href="/category">📁Categories</a>
+                
+                <a class="menu-item" href="/tag">🏷️Tags</a>
+                
+                <a class="menu-item" href="/about">📑About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">CY&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+				<div class="navbar-mobile-right">
+					
+					
+    <div class="search ">
+        <div class="search-btn" onClick="searchToggle()">
+            <img src="/image/search.png" class="search-btn-img" />
+        </div>
+        <form class="form-search">
+            <input class="input" placeholder="点此搜索" autocomplete="off" id="mobile-search-input"/>
+        </form>
+    </div>
+
+
+					<div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+				</div>
+				
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                <a class="menu-item" href="/archives">📚Posts</a>
+                
+                <a class="menu-item" href="/category">📁Categories</a>
+                
+                <a class="menu-item" href="/tag">🏷️Tags</a>
+                
+                <a class="menu-item" href="/about">📑About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">RMB Exchange Rate and RMB Internationalization</h1>
+            
+                <div class="post-meta">
+                    
+                        👨‍🎓Author: <a itemprop="author" rel="author" href="/">CY</a>
+                    
+
+                    
+                        <span class="post-time">
+                        📅Date: <a href="#">July 15, 2023&nbsp;&nbsp;14:33:09</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+							📚Category:
+                            
+                                <a href="/categories/Economic/">Economic</a>
+                            
+                        </span>
+                    
+					
+					
+						<span class="post-count">
+					📑Words:
+						<a href="">4.1k</a>
+						</span>
+					
+					
+						<span class="post-count">
+					⏱️Time:
+						<a href="">13min</a>  
+						</span>
+					
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h1 id="一-对人民币汇率的错误预测"><a class="markdownIt-Anchor" href="#一-对人民币汇率的错误预测"></a> 一、对人民币汇率的错误预测</h1>
+<p>基准利率就是一个市场上利率水平的风向标。各个金融机构，都根据这个标准来确定自己的贷款和存款利率。央行提高或者降低基准利率，就意味着提高或者降低整个社会的利率水平。中国经济增速快，美欧日相对较慢，所以中国基准利率较昂贵，海外的无风险收益率较低</p>
+<p>2014-2016流行观点</p>
+<p>经济增速下降，看空人民币汇率长期前景；房地产泡沫不可持续，远被高估未来会回到基本面，要么房价跌、要么汇率跌；地方政府债务风险大；产业资本对外转移；M2与GDP的悬殊，水分大</p>
+<p>![image-20230715143701523](RMB Exchange Rate and RMB Internationalization/image-20230715143701523.png)</p>
+<h2 id="11-经济增速与汇率的关系"><a class="markdownIt-Anchor" href="#11-经济增速与汇率的关系"></a> 1.1 经济增速与汇率的关系</h2>
+<p>顺周期经济体一般正相关，一般发展中国家；逆周期经济体一般负相关，日元美元。<strong>经济增速和汇率不是决定关系</strong></p>
+<h2 id="12-资产泡沫与汇率的关系"><a class="markdownIt-Anchor" href="#12-资产泡沫与汇率的关系"></a> 1.2 资产泡沫与汇率的关系</h2>
+<p>资产价格不具有一价定理，一线城市未来房价不一定会回归均值</p>
+<h2 id="13-债务率与汇率关系"><a class="markdownIt-Anchor" href="#13-债务率与汇率关系"></a> 1.3 债务率与汇率关系</h2>
+<p>略有相关，表现为债越多汇率越强，有钱的才能借到更多钱，国家也如此。<strong>衡量债务风险的不是债务率而是债务的定价货币</strong>，本币借的债本质上不是债，而是对持有这种货币的人征收的一种隐形的税收，地方政府借的是本币债</p>
+<h2 id="14-资本转移"><a class="markdownIt-Anchor" href="#14-资本转移"></a> 1.4 资本转移</h2>
+<p>变为资本输出方后汇率会有更强的稳定性和逆周期性，经济好时，汇率下行，经济差时汇率更强势。（参照日本70-80年代产业转移汇率变化）</p>
+<h2 id="15-m2与汇率"><a class="markdownIt-Anchor" href="#15-m2与汇率"></a> 1.5 M2与汇率</h2>
+<p>不同国家金融体制不同，美国直接融资非常发达，金融衍生品很发达， <strong>评估美国融资风险，应该用M3最广义的货币供应量</strong>，中国主要靠<strong>银行信贷，用M2</strong></p>
+<p>无法简单放在一起对比， <strong>货币发行增速和汇率之间是明确不相关的</strong></p>
+<p><strong>支撑人民币汇率强势的内在力量本质上是产业的升级和老龄化</strong></p>
+<h1 id="二-长期汇率由什么决定"><a class="markdownIt-Anchor" href="#二-长期汇率由什么决定"></a> 二、长期汇率由什么决定</h1>
+<h2 id="21长期影响汇率的因素"><a class="markdownIt-Anchor" href="#21长期影响汇率的因素"></a> 2.1长期影响汇率的因素</h2>
+<p>一个国家可贸易品的价格水平其决定因素是，技术水平和人口老龄化程度。</p>
+<h2 id="22-影响汇率的六个深层因素"><a class="markdownIt-Anchor" href="#22-影响汇率的六个深层因素"></a> 2.2 影响汇率的六个深层因素</h2>
+<p><strong>国家能力</strong>：财政开支占本国GDP开支越大，汇率长期越坚挺；</p>
+<p><strong>贸易开放度：</strong> 经济体中制造业占比高其中<strong>研发支出占比越高</strong>，汇率越强，如日本；</p>
+<p><strong>要素特征：</strong> 人还是物，是脑力还是苦力，对汇率有较强解释性</p>
+<p><strong>文明类型：</strong> 世界上最坚挺的货币有两大类，一是新教文明，欧洲的西部、北部和北美洲、大洋洲的这些经济体，荷兰——英国——德国——美国——北欧</p>
+<p>东亚文明：日本——朝鲜半岛——中国大陆——新加坡——越南，不信神，对神持有一种实用主义态度</p>
+<p>南亚——东南亚的货币汇率比较“软”，小乘佛教或印度教，不鼓励生产、消费、享乐，追求inner peace，供给需求双向萎缩比较能够忍受贫穷，货币贬值的不是很厉害</p>
+<p>三大正常宗教罗马天主教、东正教、伊斯兰教，共同特点都不鼓励生产、追逐尘世的财富，甚至鼓励教徒消费、寻求快乐，如拉美和南欧的天主教文化enjoy life。所以债务产生就是常态，如果债借多了还不起，就会导致汇率大幅贬低。而 <strong>东亚和新教文明鼓励自己的子民追逐世俗的财富和成功，以证明自身价值</strong> 。勤俭从事生产，节约不消费，攒下的剩余变为对他人的股权和债权，这种我们视为美德的在其他三大一神教文明来看是贪婪的表现，是一种罪。</p>
+<p><strong>人均智商和宗教严肃程度：</strong> 平均智商和宗教的虔诚度和严肃程度有明显的负相关，东亚是全球人均智商最高的区域，对宗教采取了非常实用主义态度，像种询盘听说你这有种能力是我需要的，我这可以为你烧高香塑金身，make a deal</p>
+<h1 id="三-中国被动成为最大外汇储备国"><a class="markdownIt-Anchor" href="#三-中国被动成为最大外汇储备国"></a> 三、中国被动成为最大外汇储备国</h1>
+<h2 id="31-外汇储备源自对汇率波动的恐惧"><a class="markdownIt-Anchor" href="#31-外汇储备源自对汇率波动的恐惧"></a> 3.1 外汇储备源自对汇率波动的恐惧</h2>
+<p>发展中国家缺乏定价权，利润单薄，汇率波动大，就可能无利可图，所以政府在工业化过程中试图把本币和全球主流的储备货币绑定保持汇率尽量不波动。</p>
+<h2 id="32-中国外汇储备是如何形成的"><a class="markdownIt-Anchor" href="#32-中国外汇储备是如何形成的"></a> 3.2 中国外汇储备是如何形成的</h2>
+<p>快速工业化——大量招商引资（92-12）——外资在结售汇制度下向银行兑换人民币——银行外汇头寸管理制度任何机构留存的外汇是有限额的，多出的必须在银行间外汇市场卖出——各地银行都有多余外汇出售，人民币需求大有升值压力——人民银行在外汇市场收购外汇（外汇占款）——国家外汇管理局——投到全球金融资产市场</p>
+<p>被动增加了很多基础货币——通胀压力——对冲流动性——央行发行央票、提高存款准备金率（相当于纳税人承担了成本）</p>
+<h2 id="33-外汇拿去干什么了"><a class="markdownIt-Anchor" href="#33-外汇拿去干什么了"></a> 3.3 外汇拿去干什么了</h2>
+<p>中国经济体客观上是美元的主要空头力量，大部分美元会被替换为其他的资产池日元、英镑等中获取收益</p>
+<h2 id="34-外汇储备无助于汇率稳定"><a class="markdownIt-Anchor" href="#34-外汇储备无助于汇率稳定"></a> 3.4 外汇储备无助于汇率稳定</h2>
+<p>1.持有巨额外汇储备的代价</p>
+<p>巨额的外汇储备——巨量外汇占款和由此而来的基础货币扩张——<strong>央行对冲成本持续积累、资产价格泡沫</strong></p>
+<p>只能被动持有美低收益国债，购买力不断减少，长期持有代价巨大</p>
+<p>2.巴西雷亚尔案例</p>
+<p>做空者怕的不是外汇储备有多少，而是资本项下的交易管制。</p>
+<h2 id="35-中国不再需要外汇储备"><a class="markdownIt-Anchor" href="#35-中国不再需要外汇储备"></a> 3.5 中国不再需要外汇储备</h2>
+<p>人口结构的改变——已经不再需要巨量的外额储备来维持较低汇率了，以后<strong>人民币长期强势才是要担心的</strong></p>
+<h1 id="四-人名币汇率波动的历史"><a class="markdownIt-Anchor" href="#四-人名币汇率波动的历史"></a> 四、人名币汇率波动的历史</h1>
+<h2 id="41-05年之前汇率为出口导向型工业化提供支持"><a class="markdownIt-Anchor" href="#41-05年之前汇率为出口导向型工业化提供支持"></a> 4.1 05年之前，汇率为出口导向型工业化提供支持</h2>
+<p>2005年之前，人民币汇率政策主要是为出口导向型的工业化提供支持。人民币从80年代的<code>1:1.5</code>持续贬值到了90年代初的<code>1:8.7</code>，一度年化贬值达到了15%。1994-2005年间，汇率长期稳定在<code>1:8.28</code>，执行有管理的浮动汇率制度，但实际是固定汇率，十年如一日保持汇率稳定。这期间，97-98金融风暴中，东南亚各国汇率大贬值，中国宣布人民币不搞竞争性贬值。虽然实现了不贬值预期，保持了香港的联系汇率制度，但是一定程度上影响了中国的出口商，直到2001年加入<code>WTO</code>才出现转机。</p>
+<p>中国在亚洲金融风暴中的负责任表现，为中国在东南亚赢得了负责任大国的形象。2001年911后美国的战略中心转移到中东反恐，同时由于地区大国日本在危机期间搞货币竞争性贬值，使得中国在东南亚的影响力持续提升。2005年，菲律宾总统阿罗约明确表示中国才是地区可以信赖的老大哥。</p>
+<h2 id="42-汇率主动-温和升值是好事吗"><a class="markdownIt-Anchor" href="#42-汇率主动-温和升值是好事吗"></a> 4.2 汇率主动、温和升值是好事吗</h2>
+<p>中国加入<code>WTO</code>后每年的出口增速都在20-30%，积累了大量贸易顺差，2007年贸易顺差占gdp10%。美国开始要求人民币升值。一个议员要求升值15%，另一个要求40%，最后取平均，要求我们升值27.5%。国内同时面临来自央行的升值压力和来自纺织、船舶等出口导向传统行业的贬值压力。</p>
+<p>在此内外环境下，2005年7月21日，人民币跳升2%，之后持续渐进升值，一直到08年底升值到了1：7。在此期间我们的汇改原则：自主、渐进、可控，每月千分之4-5，一年升值5-6%。 这种平滑的确定性升值一方面稳定了出口商的汇率预期，但是另一方面由于它的<strong>单边一致性</strong>，吸引了大量的<strong>套利交易</strong>。</p>
+<p>例如，同时在香港和深圳开贸易公司。香港借入低息美元，利率3%，通过高价值商品贸易（贵金属）与深圳公司交易，将美元以贸易方式转入国内，存入国内银行获取4%的利息收入。同时获取汇率升值的收益，这样总共可以获得6-7%的年收益。再加上高倍杠杆可以获取暴利。05年后大量热钱涌入，“自我实现”，推升了国内资产泡沫也导致了资本市场6000点大牛市（泡沫）</p>
+<h2 id="43-后金融危机时代人民币汇率何去何从"><a class="markdownIt-Anchor" href="#43-后金融危机时代人民币汇率何去何从"></a> 4.3 后金融危机时代，人民币汇率何去何从</h2>
+<p>08年金融危机之后，人民币短期（-2010年）绑定美元（固定6.8），之后又缓慢升值，但是速度大大放缓，且局部波动性加大，-2014年升值到6.1左右，每年升值2%+。<strong>2014年后出现了一个贬值周期，三年贬值10+%</strong>，-2016年贬值到6.9，每年贬值4+%。当时，人民币贷款利率6%，美元收益率1%。如果贬值太快，做空人民币会有利润，如果不贬值，潜在的贬值压力无法释放。因此贬值4%是一个比较合理的时间换空间的审慎做法。</p>
+<p>这轮贬值周期的原因，有两笔钱需要出去。第一，前期升值周期中积累的国际热钱，他们发现贬值苗头后会出逃，而不会留在国内搞建设（另外一点，美元2015年结束了长期的降息周期，开启了加息周期）第二，我们的工业化特点，在92年后，尤其0608年后，中国有着<strong>巨量的FDI（外商直接投资）</strong>，不同于日韩等国，每年有成百上千亿外资因为超国民待遇来中国投资，参与中国的工业化盛宴。</p>
+<p>这些外资相当于游牧民族，收割发展中国家的年轻劳动力。中国在2012年后开始提升发展质量，劳动力、环境要素等不再便宜贱卖，这些FDI开始逐步撤离中国。2017年后，又开始了升值，且反弹迅猛，从1:7升到了1:6.26，主要原因是此前太悲观。</p>
+<p>2018-19年，贸易战开打，人民币出现了贬值，但是政府这次并没有出来安抚。2020年重新开始升值。面对未来，我们发布了CFETS人民币指数，即人民币同一篮子货币指数，它表明人民币开始主动与美元脱钩，盯住自己的主要贸易一篮子货币，也是人民币换锚的过程。以后的汇率稳定，不是对美元的稳定，而是只对我们主要贸易伙伴的一篮子货币的稳定。（以后人民币将掌握自己的汇率主导权，而变为其它一篮子货币开始紧盯人民币，人民币变成其它货币的锚。）</p>
+<h1 id="五-铸币税及其国际国内再分配效应"><a class="markdownIt-Anchor" href="#五-铸币税及其国际国内再分配效应"></a> 五、铸币税及其国际国内再分配效应</h1>
+<h2 id="51-铸币税"><a class="markdownIt-Anchor" href="#51-铸币税"></a> 5.1 铸币税</h2>
+<p>货币发行利润或者说是向信任和储存货币的人群征收的税，71年后货币创造成本越来越低</p>
+<h2 id="52-无锚货币时代不应再痴迷储蓄"><a class="markdownIt-Anchor" href="#52-无锚货币时代不应再痴迷储蓄"></a> 5.2 无锚货币时代，不应再痴迷储蓄</h2>
+<p>货币发行增速以每年20%以上速度复合增长时，勤俭储蓄的人实际扮演了多缴税的角色，这笔隐形税收实际帮助了出口部门剥夺了国内的储蓄者，有很强大的财富再分配效应。用好杠杆做好投资，同理国家也是如此，积累了4万亿的美欧国债，国债收益率远不及央行资产负债表的扩张速度，存在海外的财富其实不断蒸发了</p>
+<h2 id="53-货币扩张对不同资产的影响"><a class="markdownIt-Anchor" href="#53-货币扩张对不同资产的影响"></a> 5.3 货币扩张对不同资产的影响</h2>
+<p>购买力不断蒸发的过程中，不同财富、商品、资产的增值速度是不同的。农产品、工业制成品等供给能力强则缺少增值能力；中国股市同样缺少增值能力，其重融资轻投资的特点总体是负和游戏，上证指数仍然在3000点左右，很难获得高收益升值保值能力强的如大城市学区房、茅台年份酒（供给有限）</p>
+<h2 id="54-货币扩张对不同资产的影响"><a class="markdownIt-Anchor" href="#54-货币扩张对不同资产的影响"></a> 5.4 货币扩张对不同资产的影响</h2>
+<p>美联储扩张资产负债表剥夺全球储蓄者，虽然补贴了美底层人民，但这救济金会迅速花掉，其实还是资本所有者获益。因为后危机时代，美国人工工资没有涨，除个别城市房价也没有涨，持续大涨的是股市（货币政策的强大再分配效应）。</p>
+<p>遇到的危机都可以通过美元霸权的铸币税效应，把代价转移给世界分摊，数万亿新增的美元欧元流动性流向全球外围地区商品和资产，  <strong>引发全球普遍通胀和资产价格上涨。</strong></p>
+<p>只有成为国际货币才能保护自己劳动创造的财富。用低息的国债置换大部分高息的地方政府债务，做大国债池子使其成为与美债相竞争的无风险资产池</p>
+<h1 id="六-分析"><a class="markdownIt-Anchor" href="#六-分析"></a> 六、分析</h1>
+<h2 id="61-人民币汇率预判及分析方法"><a class="markdownIt-Anchor" href="#61-人民币汇率预判及分析方法"></a> 6.1 人民币汇率预判及分析方法</h2>
+<p>年度出生人口如果明显下跌，汇率走强，短期关注美元指数的价格波动</p>
+<h2 id="62-美元走强的情况"><a class="markdownIt-Anchor" href="#62-美元走强的情况"></a> 6.2 美元走强的情况</h2>
+<p>美元率先欧洲、东亚经济复苏，美元会走强。全球经济低迷，美元会走强。如果美和世界同步进入比较好的经济发展状况时，美元指数会下跌。当世界经济出现危机，绝大部分流动性会躲到美国短期国债中去，美元指数反而会大幅上涨。次贷危机如此，疫情期间同样如此。</p>
+<h2 id="63-半球模型与全球资产配置的大周期理论"><a class="markdownIt-Anchor" href="#63-半球模型与全球资产配置的大周期理论"></a> 6.3 半球模型与全球资产配置的大周期理论</h2>
+<p>在美元下行周期，借入低息资本到外围新兴工业化区域投资（看哪个国家的国际收支平衡表上正在堆积越来越多的美元储备，买入最贵的房产和土地，一般十年为周期），当上涨周期到来，把当地房产卖掉后转到美国短期国债 。16年左右一个周期</p>
+<p>1970年，拉美  当时世界市场体系中心的大量投资者投资到拉美，带来当地资产价格的上升，同样1980年代初加息后，卖出当地房产、货币回归美短期国债。80年代中期，再次进入下行周期后，当趋势明确右肩交易，再去找哪些国家国际收支平衡表出现大量美元盈余，日本、韩国、台湾、新加披，进行相同的操作，到1996前后美元指数趋势性上涨，相同操作。2001年开始进行下行阶段，03年基本可以确定新一轮美元下行周期又开始了，跟着资金的流向，到了中国，到了2015年美元指数又开始上涨。</p>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>CY</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>Permalink:</span>
+                        <span><a href="http://example.com/2023/07/15/RMB%20Exchange%20Rate%20and%20RMB%20Internationalization/">http://example.com/2023/07/15/RMB%20Exchange%20Rate%20and%20RMB%20Internationalization/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>Do you believe in <strong>DESTINY</strong>?</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/Exchange-Rate/"># Exchange Rate</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+            
+            <a class="next" rel="next" href="/2023/04/12/Multimodal-learning/">Multimodal_learning</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+
+
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.min.js"></script>
+<div id="gitalk-container"></div>
+<script type="text/javascript">
+      var gitalk = new Gitalk({
+        clientID: '9810f94b2996825e7931',
+        clientSecret: 'c1aee8c436730130e3ad18694d20888a1ee13bce',
+        repo: 'Seperendity.github.io',
+        owner: 'Seperendity',
+        admin: 'Seperendity',
+        id: location.pathname,
+        labels: 'Gitalk'.split(',').filter(l => l),
+        perPage: 10,
+        pagerDirection: 'last',
+        createIssueManually: true,
+        distractionFreeMode: false
+      })
+      gitalk.render('gitalk-container')
+</script>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© CY | 2022 - 2023 😉 Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a>
+		|
+		<!-- 访客数量 -->
+		
+		  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+<span class="site-uv">
+
+  <i class="iconfont icon-yonghu "></i>
+
+ <i class="busuanzi-value" id="busuanzi_value_site_uv"></i>
+
+</span>&nbsp;
+
+
+
+
+
+<span class="site-pv">
+
+ <i class="iconfont icon-jiaoyinzujifangke "></i>
+
+ <i class="busuanzi-value" id="busuanzi_value_site_pv"></i>
+
+</span>
+
+
+		
+		</span>
+    </div>
+</footer>
+
+<script>
+    $(document).ready(function () {
+
+        var int = setInterval(fixCount, 50);  // 50ms周期检测函数
+        var pvcountOffset = 80000;  // 初始化首次数据
+        var uvcountOffset = 20000;
+
+        function fixCount() {
+            if (document.getElementById("busuanzi_container_site_pv").style.display != "none") {
+                $("#busuanzi_value_site_pv").html(parseInt($("#busuanzi_value_site_pv").html()) + pvcountOffset);
+                clearInterval(int);
+            }
+            if ($("#busuanzi_container_site_pv").css("display") != "none") {
+                $("#busuanzi_value_site_uv").html(parseInt($("#busuanzi_value_site_uv").html()) + uvcountOffset); // 加上初始数据 
+                clearInterval(int); // 停止检测
+            }
+        }
+    });
+</script>
+
+    </div>
+	
+	<!-- 搜索功能 -->
+	<!-- Chic/layout.ejs -->
+	<div id="u-search">
+		<div class="modal">
+			<div class="modal-header">
+				<div class="container">
+					<form id="u-search-modal-form" class="u-search-modal-form">
+						<button type="submit" class="form-submit-btn">
+							<img src="/image/search.png" class="search-btn-img" />
+						</button>
+						<input placeholder="搜索内容..." class="form-input" id="modal-form-input">
+					</form>
+					<a class="modal-close">x</a>
+				</div>
+				<div class="search-loading">
+					<div class="search-loading-bar"></div>
+				</div>
+			</div>
+			<div class="modal-body">
+			</div>
+		</div>
+		<div class="modal-overlay"></div>
+	</div>
+</body>
+<script>
+!
+function() {
+    function n(n, e, t) {
+        return n.getAttribute(e) || t
+    }
+    function e(n) {
+        return document.getElementsByTagName(n)
+    }
+    function t() {
+        var t = e("script"),
+        o = t.length,
+        i = t[o - 1];
+        return {
+            l: o,
+            z: n(i, "zIndex", -1),     //置于主页面背后
+            o: n(i, "opacity", .5),     //线条透明度
+            c: n(i, "color", "0,0,0"),  //线条颜色
+            n: n(i, "count", 100)    //线条数量
+        }
+    }
+    function o() {
+        a = m.width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth,
+        c = m.height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
+    }
+    function i() {
+        r.clearRect(0, 0, a, c);
+        var n, e, t, o, m, l;
+        s.forEach(function(i, x) {
+            for (i.x += i.xa, i.y += i.ya, i.xa *= i.x > a || i.x < 0 ? -1 : 1, i.ya *= i.y > c || i.y < 0 ? -1 : 1, r.fillRect(i.x - .5, i.y - .5, 1, 1), e = x + 1; e < u.length; e++) n = u[e],
+            null !== n.x && null !== n.y && (o = i.x - n.x, m = i.y - n.y, l = o * o + m * m, l < n.max && (n === y && l >= n.max / 2 && (i.x -= .03 * o, i.y -= .03 * m), t = (n.max - l) / n.max, r.beginPath(), r.lineWidth = t / 2, r.strokeStyle = "rgba(" + d.c + "," + (t + .2) + ")", r.moveTo(i.x, i.y), r.lineTo(n.x, n.y), r.stroke()))
+        }),
+        x(i)
+    }
+    var a, c, u, m = document.createElement("canvas"),
+    d = t(),
+    l = "c_n" + d.l,
+    r = m.getContext("2d"),
+    x = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
+    function(n) {
+        window.setTimeout(n, 1e3 / 45)
+    },
+    w = Math.random,
+    y = {
+        x: null,
+        y: null,
+        max: 2e4
+    };
+    m.id = l,
+    m.style.cssText = "position:fixed;top:0;left:0;z-index:" + d.z + ";opacity:" + d.o,
+    e("body")[0].appendChild(m),
+    o(),
+    window.onresize = o,
+    window.onmousemove = function(n) {
+        n = n || window.event,
+        y.x = n.clientX,
+        y.y = n.clientY
+    },
+    window.onmouseout = function() {
+        y.x = null,
+        y.y = null
+    };
+    for (var s = [], f = 0; d.n > f; f++) {
+        var h = w() * a,
+        g = w() * c,
+        v = 2 * w() - 1,
+        p = 2 * w() - 1;
+        s.push({
+            x: h,
+            y: g,
+            xa: v,
+            ya: p,
+            max: 6e3
+        })
+    }
+    u = s.concat([y]),
+    setTimeout(function() {
+        i()
+    },
+    100)
+} ();
+</script>
+
+<script type='text/javascript' id='clustrmaps' src='//cdn.clustrmaps.com/map_v2.js?cl=ffffff&w=350&t=m&d=1NqKKNlM62oDkLYA7mQMmVg49mUH_Ib-6MkRgvd04o8&co=2d78ad&cmo=ffc253&cmn=ff5353&ct=ffffff'></script>
+
+</html>
