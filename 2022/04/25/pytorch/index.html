@@ -491,7 +491,7 @@
 <li>
 <p>module中的<code>parameter</code>方法</p>
 <ol>
-<li>注意<code>parameter</code> 与<code>_parameters</code>区分，前者返回的是迭代器，包括当前模块和各个子模块的参数。后者返回的是当前模块中的参数。</li>
+<li>注意<code>parameter</code> 与<code>_parameters </code>区分，前者返回的是迭代器，包括当前模块和各个子模块的参数。后者返回的是当前模块中的参数。</li>
 <li>其中会执行<code>named_papameters</code> 最终返回的是个迭代器对象[key, value]</li>
 </ol>
 <figure class="highlight python"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">for</span> p <span class="keyword">in</span> test_module.named_parameters():</span><br><span class="line">    	<span class="built_in">print</span>(p)</span><br></pre></td></tr></tbody></table></figure>
@@ -580,9 +580,9 @@
 <h1 id="5-einsum"><a class="markdownIt-Anchor" href="#5-einsum"></a> 5. einsum</h1>
 <p>基本规则：</p>
 <ul>
-<li>在不同输入之间重复出现的索引表示，把输入张量沿着该维度做乘法操作。如<code>"ik,kj-&gt;ij"</code>，<code>k</code> 在输入中重复出现，所以就是把 <code>a</code> 和 <code>b</code> 沿着<code>k</code> 这个维度作相乘操作</li>
+<li>在不同输入之间重复出现的索引表示，把输入张量沿着该维度做乘法操作。如<code>"ik,kj-&gt;ij"</code>，<code>k</code> 在输入中重复出现，所以就是把 <code>a</code> 和 <code>b</code> 沿着<code> k</code> 这个维度作相乘操作</li>
 <li>只出现在一边的索引，表示中间计算结果需要在这个维度上求和</li>
-<li>等式 右边的索引顺序可以是任意的，比如上面的<code>"ik,kj-&gt;ij"</code>如果写成<code>"ik,kj-&gt;ji"</code>，那么就是返回输出结果的转置，用户只需要定义好索引的顺序。</li>
+<li>等式 右边的索引顺序可以是任意的，比如上面的<code>"ik,kj-&gt;ij"</code>如果写成<code> "ik,kj-&gt;ji"</code>，那么就是返回输出结果的转置，用户只需要定义好索引的顺序。</li>
 </ul>
 <p>特殊规则：</p>
 <ul>

@@ -457,7 +457,7 @@
 					
 						<span class="post-count">
 					📑Words:
-						<a href="">961</a>
+						<a href="">962</a>
 						</span>
 					
 					
@@ -496,7 +496,7 @@
 <p><img src="/2022/06/19/mmcv/image-20220619203517389.png" alt="image-20220619203517389"></p>
 <p>从<code>Config</code>中取对应字段的配置信息<strong>还没有将其变成具体的实例只有解析功能</strong>，要通过<code>Registry</code>将对应实例构建出来。</p>
 <p><img src="/2022/06/19/mmcv/image-20220619204730643.png" alt="image-20220619204730643"></p>
-<p>根据<code>type</code>字段将<code>cfg</code>粗略分为两个类型。<code>type</code>类型：<strong>训练时该变量的实例化后类型，其余字段为该变量实例化所需的参数。</strong><code>Registry</code>会根据<code>type</code> 和其他参数将变量实例化。</p>
+<p>根据<code>type</code>字段将<code>cfg</code>粗略分为两个类型。<code>type</code>类型：<strong>训练时该变量的实例化后类型，其余字段为该变量实例化所需的参数。</strong><code>Registry </code>会根据<code>type</code> 和其他参数将变量实例化。</p>
 <p><code>mmcv</code>训练最外层的抽象是<code>runner</code>，其有非常多的属性，如果在配置文件中写入runner，会导致嵌入很多层级的字典，阅读不便。所以在可读性和一一映射关系上做了取舍。对于<code>dataloader</code>和<code>dataset</code>为了防止文件嵌套层级过深，只将一些显而易见的属性写在最外层，不将这些暴露给用户 。</p>
 <p><img src="/2022/06/19/mmcv/image-20220619210213182.png" alt="image-20220619210213182"></p>
 <p><img src="/2022/06/19/mmcv/image-20220619210605888.png" alt="image-20220619210605888"></p>
