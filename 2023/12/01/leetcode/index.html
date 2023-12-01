@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="CY">
+
+
+
+
+
+<title>leetcode | Serendipity</title>
+
+
+
+    <link rel="icon" href="/bitbug_favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+    <link rel="stylesheet" href="/../fonts/iconfont2/iconfont.css">
+    
+    <link rel="stylesheet" href="/../fonts/iconfont3/iconfont.css">
+    
+    <link rel="stylesheet" href="/../fonts/iconfont4/iconfont.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+    <script src="/js/jquery-3.6.0.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+<!-- 搜索的部分 -->
+
+
+
+    <script>
+    function searchToggle() {
+        const width = $(document.body).width()
+        if(width > 479) {
+            return;
+        }
+        const search = $('.search');
+		const searchForm = $('.form-search')
+		const menuToggle = $('.menu-toggle');
+		const title = $('.navbar-header-title ');
+
+        if(!search.hasClass("mobile-search")) {
+            search.addClass("mobile-search");
+			menuToggle.addClass("open-search")
+			title.addClass("mobile-title-hidden")
+        } else {
+            search.removeClass("mobile-search");
+			menuToggle.removeClass("open-search")
+			// title.css({visibility: 'visible'})
+			title.removeClass("mobile-title-hidden")
+        } 
+    }
+
+    function searchToggle() {
+        const width = $(document.body).width()
+        if(width > 479) {
+            return;
+        }
+        const search = $('.search');
+        const searchForm = $('.form-search');
+        const menuToggle = $('.menu-toggle');
+        const title = $('.navbar-header-title ');
+
+        if(!search.hasClass("mobile-search")) {
+            search.addClass("mobile-search");
+            menuToggle.addClass("open-search")
+            title.addClass("mobile-title-hidden")
+        } else {
+            search.removeClass("mobile-search");
+            menuToggle.removeClass("open-search")
+            // title.css({visibility: 'visible'})
+            title.removeClass("mobile-title-hidden")
+        } 
+    }
+
+
+
+    function search(searchInputEl, formEl, flag) {
+        const path = "/" + "search.json"; // 可以在public 下查看这个search.json
+        $(formEl).submit(function(e){
+            e.preventDefault();
+            let target = null
+            if(searchInputEl == null) {
+                const screenWidth = $(document.body).width();
+                target = screenWidth > 479 ? $('#pc-search-input') : $('#mobile-search-input');
+                console.log(target);
+            } else {
+                target = $(searchInputEl)
+            }
+
+            if(!flag && target.val() === '') {
+                return ;
+            }
+
+            $("#u-search").fadeIn(500, function() {
+                $("body > .wrapper").addClass("modal-active");
+
+                $.ajax({
+                    url: path,
+                    dataType: "json",
+                    beforeSend: function (xhr) {
+                        $input = target.val();
+                        $(".form-input").val($input);
+                        const loadingBar = $('.search-loading-bar') 
+                        loadingBar.css({
+                            width:'100%',
+                            display: 'block'
+                        });
+                    },
+                    success: function( datas ) {
+                        console.log(datas);
+                        const $resultPanel = $(".modal-body")[0];
+                        let str = `<ul class="modal-results">`;
+                        var keywords = $(".form-input").val().trim().toLowerCase().split(/[\s\-]+/);
+                        $resultPanel.innerHTML = "";
+                        let hasResult = false
+                        let text = `<div class="no-result">找不到与关键词相关的内容....</div>`;
+
+                        if ($(".form-input").val().trim().length <= 0) {
+                            // 没有结果
+                            $resultPanel.innerHTML = text;
+                            return;
+                        }
+                        datas.forEach(function (data, index) {
+                            var isMatch = true;
+                            if (!data.title || data.title.trim() === '') {
+                                data.title = "Untitled";
+                            }
+                            var data_title = data.title.trim().toLowerCase();
+                            var data_content = data.content && data.content.trim().replace(/<[^>]+>/g, "").toLowerCase() || '';
+                            var data_url = data.url;
+                            var index_title = -1;
+                            var index_content = -1;
+                            var first_occur = -1;
+                            // only match artiles with not empty contents
+                            if (data_content !== '') {
+                                keywords.forEach(function (keyword, i) {
+                                    index_title = data_title.indexOf(keyword);
+                                    index_content = data_content.indexOf(keyword);
+
+                                    if (index_title < 0 && index_content < 0) {
+                                        isMatch = false;
+                                    } else {
+                                        hasResult = true
+                                        if (index_content < 0) {
+                                            index_content = 0;
+                                        }
+                                        if (i == 0) {
+                                            first_occur = index_content;
+                                        }
+                                    }
+                                });
+                            } else {
+                                isMatch = false;
+                            }
+                            // show search results
+                            if (isMatch) {
+                                str += `<li class='result-item'><a href='${data_url}' class='result-item-detail'> <span class="title">${data_title}</span>`;
+                                var content = data.content.trim().replace(/<[^>]+>/g, "");
+                                if (first_occur >= 0) {
+                                    // cut out 200 characters
+                                    var start = first_occur - 40;
+                                    var end = first_occur + 160;
+
+                                    if (start < 0) {
+                                        start = 0;
+                                    }
+
+                                    if (start == 0) {
+                                        end = 200;
+                                    }
+
+                                    if (end > content.length) {
+                                        end = content.length;
+                                    }
+
+                                    var match_content = content.substring(start, end);
+
+                                    // highlight all keywords
+                                    keywords.forEach(function (keyword) {
+                                        var regS = new RegExp(keyword, "gi");
+                                        match_content = match_content.replace(regS, `<em class="search-keyword">${keyword}</em>`);
+                                    });
+
+                                    str += `<span class="content"> ${match_content} ...</span></a>`;
+                                }
+                                str += "</li>";
+                            }
+                        });
+                        str += "</ul>";
+                        if(hasResult) {
+                            $resultPanel.innerHTML = str;
+                        } else {
+                            $resultPanel.innerHTML = text;
+                        }
+
+                    },
+                    complete: function() {
+                        setTimeout(() => {
+                                const loadingBar = $('.search-loading-bar') 
+                                loadingBar.css({
+                                    width:'0%',
+                                    display: 'none'
+                                });
+                        }, 300)
+                    }
+                });
+            })
+
+        });
+    }
+
+    $(document).ready(function() {
+        $('.modal-close').click(function () { 
+            $("#u-search").fadeOut();
+            $("body > .wrapper").removeClass("modal-active")
+        })
+
+        $('.modal-overlay').click(function() {
+            $("#u-search").fadeOut();
+            $("body > .wrapper").removeClass("modal-active")
+        })
+        search(null, ".form-search", false)
+        search("#u-search-modal-form .form-input", ".u-search-modal-form", true)
+    })
+</script>
+
+<meta name="generator" content="Hexo 6.1.0">
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <!-- div class="navbar-header header-logo"><a href="/">CY&#39;s Blog</a></div -->
+			<div class="navbar-header header-logo"><a href="/"><i class="iconfont icon-zhuye" style="font-size: 1em;"></i>CY&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+				<!-- 这里表示的是pc端搜索框 -->
+				
+				
+    <div class="search ">
+        <div class="search-btn" onClick="searchToggle()">
+            <img src="/image/search.png" class="search-btn-img" />
+        </div>
+        <form class="form-search">
+            <input class="input" placeholder="点此搜索" autocomplete="off" id="pc-search-input"/>
+        </form>
+    </div>
+
+
+                
+                <a class="menu-item" href="/archives">📚Posts</a>
+                
+                <a class="menu-item" href="/category">📁Categories</a>
+                
+                <a class="menu-item" href="/tag">🏷️Tags</a>
+                
+                <a class="menu-item" href="/about">📑About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">CY&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+				<div class="navbar-mobile-right">
+					
+					
+    <div class="search ">
+        <div class="search-btn" onClick="searchToggle()">
+            <img src="/image/search.png" class="search-btn-img" />
+        </div>
+        <form class="form-search">
+            <input class="input" placeholder="点此搜索" autocomplete="off" id="mobile-search-input"/>
+        </form>
+    </div>
+
+
+					<div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+				</div>
+				
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                <a class="menu-item" href="/archives">📚Posts</a>
+                
+                <a class="menu-item" href="/category">📁Categories</a>
+                
+                <a class="menu-item" href="/tag">🏷️Tags</a>
+                
+                <a class="menu-item" href="/about">📑About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">leetcode</h1>
+            
+                <div class="post-meta">
+                    
+                        👨‍🎓Author: <a itemprop="author" rel="author" href="/">CY</a>
+                    
+
+                    
+                        <span class="post-time">
+                        📅Date: <a href="#">December 1, 2023&nbsp;&nbsp;23:21:03</a>
+                        </span>
+                    
+                    
+					
+					
+						<span class="post-count">
+					📑Words:
+						<a href="">3.7k</a>
+						</span>
+					
+					
+						<span class="post-count">
+					⏱️Time:
+						<a href="">15min</a>  
+						</span>
+					
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h1 id="一-数组"><a class="markdownIt-Anchor" href="#一-数组"></a> 一、数组</h1>
+<h2 id="1-二分查找"><a class="markdownIt-Anchor" href="#1-二分查找"></a> 1. 二分查找</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">704、二分查找</th>
+<th style="text-align:center">35、搜索插入位置</th>
+<th style="text-align:center">34、在排序数组中查找元素的第一个和最后一个位置</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">仅需查值，存在则返回middle</td>
+<td style="text-align:center">最后左指针索引即应插入的位置</td>
+<td style="text-align:center">有重复元素寻找边界，两次二分查找</td>
+</tr>
+</tbody>
+</table>
+<h3 id="704二分查找"><a class="markdownIt-Anchor" href="#704二分查找"></a> 704.<a target="_blank" rel="noopener" href="https://leetcode.cn/problems/binary-search/">二分查找</a></h3>
+<p>给定一个<code>n</code>个元素有序的（升序）整型数组<code>nums</code>和一个目标值<code>target</code>，写一个函数搜索<code>nums</code>中的 <code>target</code>，如果目标值存在返回下标，否则返回 -1。</p>
+<p>提示：数组中无重复元素（不然下标不唯一）</p>
+<p><strong>二分查找的前提条件：<strong>数组为</strong>有序数组</strong></p>
+<p><strong>算法思路：</strong> 1. 确定区间	2. 确定循环条件	3. 确定左右边界</p>
+<p><strong>二分查找中最关键的点在于区间的定义</strong>。在 <code>while</code> 寻找中每一次边界的处理都要坚持根据<strong>区间的定义</strong>来操作。区间的定义一般为两种，左闭右闭即 <code>left=0, right=len(nums)-1 </code> 或者左闭右开 <code>left=0, right=len(nums)</code> 。</p>
+<h3 id="left-right"><a class="markdownIt-Anchor" href="#left-right"></a> <strong>[left, right]</strong></h3>
+<ul>
+<li>
+<p><strong>因为定义target在[left, right]区间</strong>，因此<code>while</code>循环中条件为<code>left &lt;= right</code></p>
+</li>
+<li>
+<p><code>if (nums[middle] &gt; target)</code> <code>right</code> 要赋值为<code>middle - 1</code>，因为当前这个<code>nums[middle]</code>一定不是<code>target</code>，那么接下来要查找的右区间结束下标位置就是<code> middle - 1</code></p>
+</li>
+<li>
+<p><code>if (nums[middle] &lt; target)</code> <code>left</code> 要赋值为<code>middle + 1</code>，因为当前这个<code>nums[middle]</code>一定不是<code>target</code>，那么接下来要查找的左区间结束下标位置就是<code> middle + 1</code></p>
+<figure class="highlight python"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span>(<span class="title class_ inherited__">object</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">search</span>(<span class="params">self, nums, target</span>):</span><br><span class="line">        <span class="string">"""</span></span><br><span class="line"><span class="string">        :type nums: List[int]</span></span><br><span class="line"><span class="string">        :type target: int</span></span><br><span class="line"><span class="string">        :rtype: int</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        left = <span class="number">0</span></span><br><span class="line">        right = <span class="built_in">len</span>(nums)-<span class="number">1</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span> (left&lt;=right):</span><br><span class="line">            <span class="comment"># middle = left + ((right - left) / 2)这种写法是为了防止int类型数据溢出</span></span><br><span class="line">            middle = (left+right)//<span class="number">2</span></span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (nums[middle]&gt;target):</span><br><span class="line">                right = middle-<span class="number">1</span></span><br><span class="line">            <span class="keyword">elif</span> (nums[middle]&lt;target):</span><br><span class="line">                left= middle+<span class="number">1</span></span><br><span class="line">            <span class="keyword">else</span>: </span><br><span class="line">                <span class="keyword">return</span> middle</span><br><span class="line">        <span class="keyword">return</span> -<span class="number">1</span></span><br></pre></td></tr></tbody></table></figure>
+</li>
+</ul>
+<h3 id="left-right-2"><a class="markdownIt-Anchor" href="#left-right-2"></a> <strong>[left, right)</strong></h3>
+<ul>
+<li>
+<p><strong>因为定义target在[left, right)区间</strong>,因此<code>while</code>循环中条件为<code>left &lt; right</code></p>
+</li>
+<li>
+<p><code>if (nums[middle] &gt; target)</code> <code>right</code> 要赋值为<code>middle </code>，因为当前这个<code>nums[middle]</code>一定不是 <code>target</code> ，右指针更新后while循环右侧开区间没有考虑<code>middle</code> 。</p>
+</li>
+<li>
+<p><code>if (nums[middle] &lt; target)</code> <code>left</code> 要赋值为<code>middle + 1 </code> ，因为左边界是能取到的。</p>
+<figure class="highlight python"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span>(<span class="title class_ inherited__">object</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">search</span>(<span class="params">self, nums, target</span>):</span><br><span class="line">        <span class="string">"""</span></span><br><span class="line"><span class="string">        :type nums: List[int]</span></span><br><span class="line"><span class="string">        :type target: int</span></span><br><span class="line"><span class="string">        :rtype: int</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        left = <span class="number">0</span></span><br><span class="line">        right = <span class="built_in">len</span>(nums)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span> (left &lt; right):</span><br><span class="line">            middle = (left+right)//<span class="number">2</span></span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (nums[middle]&gt;target):</span><br><span class="line">                right = middle</span><br><span class="line">            <span class="keyword">elif</span> (nums[middle]&lt;target):</span><br><span class="line">                left= middle+<span class="number">1</span></span><br><span class="line">            <span class="keyword">else</span>: </span><br><span class="line">                <span class="keyword">return</span> middle</span><br><span class="line">        <span class="keyword">return</span> -<span class="number">1</span></span><br></pre></td></tr></tbody></table></figure>
+<h3 id="35搜索插入位置"><a class="markdownIt-Anchor" href="#35搜索插入位置"></a> 35.<a target="_blank" rel="noopener" href="https://leetcode.cn/problems/search-insert-position/">搜索插入位置</a></h3>
+<p>给定一个排序数组和一个目标值，在数组中找到目标值，并返回其索引。如果目标值不存在于数组中，返回它将会被按顺序插入的位置。</p>
+<p>提示：请必须使用时间复杂度为 <code>O(log n)</code> 的算法，<code>nums</code> 为 <strong>无重复元素</strong> 的<strong>升序</strong>排列数组。</p>
+<p>**算法思路：**1. 目标值等于数组中某元素，<code>return middle</code></p>
+<p>​					2. 当目标值需要插入数组中，最后返回的下标<code>left = right + 1</code>，跳出循环。</p>
+<figure class="highlight python"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span>(<span class="title class_ inherited__">object</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">searchInsert</span>(<span class="params">self, nums, target</span>):</span><br><span class="line">        <span class="string">"""</span></span><br><span class="line"><span class="string">        :type nums: List[int]</span></span><br><span class="line"><span class="string">        :type target: int</span></span><br><span class="line"><span class="string">        :rtype: int</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line"></span><br><span class="line">        left, right=<span class="number">0</span>, <span class="built_in">len</span>(nums)-<span class="number">1</span></span><br><span class="line">        <span class="keyword">while</span> (left&lt;=right):</span><br><span class="line">            middle=(left+right)//<span class="number">2</span></span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> target==nums[middle]:</span><br><span class="line">                <span class="keyword">return</span> middle</span><br><span class="line">            <span class="keyword">elif</span> nums[middle]&lt;target:</span><br><span class="line">                left = middle+<span class="number">1</span></span><br><span class="line">            <span class="keyword">else</span>: </span><br><span class="line">                right = middle-<span class="number">1</span></span><br><span class="line">        <span class="comment"># 此处可以是left或者right + 1</span></span><br><span class="line">        <span class="keyword">return</span> left</span><br></pre></td></tr></tbody></table></figure>
+<p><img src="/2023/12/01/leetcode/image-20220703100619570.png" alt="image-20220703100619570"></p>
+<p><img src="/2023/12/01/leetcode/image-20220703100704164.png" alt="image-20220703100704164"></p>
+</li>
+</ul>
+<p><img src="/2023/12/01/leetcode/image-20220703100833704.png" alt="image-20220703100833704"></p>
+<p><img src="/2023/12/01/leetcode/image-20220703100849719.png" alt="image-20220703100849719"></p>
+<p>上图两个例子反映左指针即是要插入的下标位置。</p>
+<h3 id="34在排序数组中查找元素的第一个和最后一个位置"><a class="markdownIt-Anchor" href="#34在排序数组中查找元素的第一个和最后一个位置"></a> 34.<a target="_blank" rel="noopener" href="https://leetcode.cn/problems/find-first-and-last-position-of-element-in-sorted-array/">在排序数组中查找元素的第一个和最后一个位置</a></h3>
+<p>给你一个按照<strong>非递减顺序</strong>排列的整数数组<code>nums</code>，和一个目标值<code>target</code>。请你找出给定目标值在数组中的开始位置和结束位置。</p>
+<p>如果数组中不存在目标值 <code>target</code> ，返回 [-1, -1]。你必须设计并实现时间复杂度为 <code>O(log n)</code> 的算法解决此问题。</p>
+<p>**算法思路：**1. 暴力求解：利用数组有序的特点从头到尾遍历一次数组。遍历到的元素刚好等于<code>target</code>记录为第一个位置，遍历到刚好不等于<code>target</code>的元素记录为最后一个位置。</p>
+<p>​					2. 二分查找：目标元素在有序数组中可能存在多个，当<code>nums[middle]</code>恰好等于<code>target</code>时，还<strong>要继续查找</strong>。<strong>用两个二分查找，一个二分查找查找左边界，另一个查找右边界</strong>。</p>
+<figure class="highlight python"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span>(<span class="title class_ inherited__">object</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">searchRange</span>(<span class="params">self, nums, target</span>):</span><br><span class="line">        <span class="string">"""</span></span><br><span class="line"><span class="string">        :type nums: List[int]</span></span><br><span class="line"><span class="string">        :type target: int</span></span><br><span class="line"><span class="string">        :rtype: List[int]</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        left = self.searchleft(nums, target)</span><br><span class="line">        right = self.searchright(nums, target)</span><br><span class="line">        <span class="keyword">return</span> [left, right]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">searchleft</span>(<span class="params">self, nums, target</span>):</span><br><span class="line">        left, right = <span class="number">0</span>, <span class="built_in">len</span>(nums) - <span class="number">1</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span> (left &lt;= right):</span><br><span class="line">            mid = left + ((right-left)/<span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (target &lt;= nums[mid]):</span><br><span class="line">                right = mid - <span class="number">1</span></span><br><span class="line">            <span class="keyword">else</span>: </span><br><span class="line">                left = mid + <span class="number">1</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> left &gt;= <span class="built_in">len</span>(nums) <span class="keyword">or</span> nums[left]!=target:</span><br><span class="line">            <span class="keyword">return</span> -<span class="number">1</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> left</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">searchright</span>(<span class="params">self,nums,target</span>):</span><br><span class="line">        left, right = <span class="number">0</span>,<span class="built_in">len</span>(nums)-<span class="number">1</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span> (left &lt;= right):</span><br><span class="line">            mid = left + ((right-left)/<span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (target&gt;=nums[mid]):</span><br><span class="line">                left = mid + <span class="number">1</span></span><br><span class="line">            <span class="keyword">else</span>: </span><br><span class="line">                right = mid - <span class="number">1</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> right &lt; <span class="number">0</span> <span class="keyword">or</span> nums[right]!=target:</span><br><span class="line">            <span class="keyword">return</span> -<span class="number">1</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> right</span><br></pre></td></tr></tbody></table></figure>
+<h2 id="2-移除元素"><a class="markdownIt-Anchor" href="#2-移除元素"></a> <strong>2. 移除元素</strong></h2>
+<h3 id="27-移除元素"><a class="markdownIt-Anchor" href="#27-移除元素"></a> 27. <a target="_blank" rel="noopener" href="https://leetcode.cn/problems/remove-element/">移除元素</a></h3>
+<p>给你一个数组 <code>nums</code> 和一个值 <code>val</code> ，你需要原地移除所有数值等于 <code>val</code> 的元素，并返回移除后数组的新长度。不要使用额外的数组空间，你必须仅使用 O(1) 额外空间并原地修改输入数组。元素的顺序可以改变。你不需要考虑数组中超出新长度后面的元素。</p>
+<p>**算法思路：**双指针法（快慢指针法）</p>
+<p>**快指针：**遍历数组元素</p>
+<p>**慢指针：**指向更新新数组下标的位置</p>
+<figure class="highlight python"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span>(<span class="title class_ inherited__">object</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">removeElement</span>(<span class="params">self, nums, val</span>):</span><br><span class="line">        <span class="string">"""</span></span><br><span class="line"><span class="string">        :type nums: List[int]</span></span><br><span class="line"><span class="string">        :type val: int</span></span><br><span class="line"><span class="string">        :rtype: int</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        <span class="comment"># 此处slow、fast指向同一位置，最终返回的slow即数组长度。若slow与fast差一位，则slow +1为数组长度，对应26题</span></span><br><span class="line">        fast = <span class="number">0</span></span><br><span class="line">        slow = <span class="number">0</span></span><br><span class="line">        <span class="keyword">while</span> fast &lt; <span class="built_in">len</span>(nums):</span><br><span class="line">            <span class="keyword">if</span> (nums[fast]!= val):</span><br><span class="line">                nums[slow]=nums[fast]</span><br><span class="line">                slow+=<span class="number">1</span></span><br><span class="line">            fast+=<span class="number">1</span></span><br><span class="line">        <span class="keyword">return</span> slow</span><br></pre></td></tr></tbody></table></figure>
+<h3 id="977有序数组的平方"><a class="markdownIt-Anchor" href="#977有序数组的平方"></a> 977.<a target="_blank" rel="noopener" href="https://leetcode.cn/problems/squares-of-a-sorted-array/">有序数组的平方</a></h3>
+<p>给你一个按 <strong>非递减顺序</strong> 排序的整数数组 <code>nums</code> ，返回 <strong>每个数字的平方</strong> 组成的新数组，要求也按<strong>非递减顺序</strong>排序。</p>
+<p><strong>算法思路：<strong>数组平方的最大值就在数组的两端，不是最左边就是最右边。可以考虑双指针法了， <code>i</code> 指向</strong>起始</strong>位置， <code>j</code> 指向<strong>终止</strong>位置。定义一个新数组 <code>ans</code> ，和原数组一样的大小，让 <code>k</code> 指向 <code>ans</code> 数组<strong>终止位置</strong>。</p>
+<figure class="highlight python"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span>(<span class="title class_ inherited__">object</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">sortedSquares</span>(<span class="params">self, nums</span>):</span><br><span class="line">        <span class="string">"""</span></span><br><span class="line"><span class="string">        :type nums: List[int]</span></span><br><span class="line"><span class="string">        :rtype: List[int]</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        ans = [<span class="number">0</span>] * <span class="built_in">len</span>(nums)-<span class="number">1</span></span><br><span class="line">        i, j, k = <span class="number">0</span>, <span class="built_in">len</span>(nums)-<span class="number">1</span>, <span class="built_in">len</span>(nums)-<span class="number">1</span></span><br><span class="line">        <span class="keyword">while</span> i &lt;= j:</span><br><span class="line">            <span class="keyword">if</span> nums[i] * nums[i] &gt; nums[j] * nums[j]:</span><br><span class="line">                ans[k] = nums[i] * nums[i]</span><br><span class="line">                i += <span class="number">1</span></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                ans[k] = nums[j] * nums[j]</span><br><span class="line">                j -= <span class="number">1</span></span><br><span class="line">            k -= <span class="number">1</span></span><br><span class="line">       <span class="keyword">return</span> ans</span><br><span class="line">            </span><br></pre></td></tr></tbody></table></figure>
+<h2 id="209长度最小的子数组"><a class="markdownIt-Anchor" href="#209长度最小的子数组"></a> 209.<a target="_blank" rel="noopener" href="https://leetcode.cn/problems/minimum-size-subarray-sum/">长度最小的子数组</a></h2>
+<p>给定一个含有 <code>n</code> 个正整数的数组和一个正整数 <code>target</code> 。</p>
+<p>找出该数组中满足其<strong>和</strong>  <code>≥ target</code> 的长度最小的连续子数组 <code>[numsl, numsl+1, ..., numsr-1, numsr]</code>，并<strong>返回其长度</strong>。如果不存在符合条件的子数组，返回0 。</p>
+<p><strong>算法思路：</strong> 双指针法</p>
+<ul>
+<li>使用左右指针，left 和 right 之间的长度即为滑动窗口的大小（即连续数组的大小）。</li>
+<li>如果滑动窗口内的值 sum &gt;= target，维护连续数组最短长度，left 向右移动，缩小滑动窗口。</li>
+<li>如果滑动窗口内的值 sum &lt; target，则 right 向有移动，扩大滑动窗口。</li>
+</ul>
+<figure class="highlight python"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span>(<span class="title class_ inherited__">object</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">minSubArrayLen</span>(<span class="params">self, target, nums</span>):</span><br><span class="line">        <span class="string">"""</span></span><br><span class="line"><span class="string">        :type target: int</span></span><br><span class="line"><span class="string">        :type nums: List[int]</span></span><br><span class="line"><span class="string">        :rtype: int</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        <span class="comment"># 首先初始化left和right指针以及当前和sum、最小长度 min_len</span></span><br><span class="line">        <span class="built_in">sum</span> = <span class="number">0</span></span><br><span class="line">        left, right = <span class="number">0</span>, <span class="number">0</span></span><br><span class="line">        min_len = <span class="built_in">int</span>(<span class="string">"inf"</span>)</span><br><span class="line">        n = <span class="built_in">len</span>(nums)</span><br><span class="line">        </span><br><span class="line">        <span class="comment">#滑动窗口left&lt;=right一直满足，最外层while条件是右指针小于n</span></span><br><span class="line">        <span class="keyword">while</span> right &lt; n:</span><br><span class="line">            <span class="built_in">sum</span> += nums[right]</span><br><span class="line">            <span class="keyword">while</span> <span class="built_in">sum</span> &gt;= target:</span><br><span class="line">                length = right - left + <span class="number">1</span></span><br><span class="line">                min_len = <span class="built_in">min</span>(length, min_len)</span><br><span class="line">                <span class="built_in">sum</span> -= nums[left]</span><br><span class="line">                left += <span class="number">1</span></span><br><span class="line">            right += <span class="number">1</span></span><br><span class="line">		<span class="keyword">if</span> min_len == <span class="built_in">float</span>(<span class="string">'inf'</span>):</span><br><span class="line">            <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">return</span> min_len</span><br></pre></td></tr></tbody></table></figure>
+<h3 id="59-螺旋数组ii"><a class="markdownIt-Anchor" href="#59-螺旋数组ii"></a> 59. <a target="_blank" rel="noopener" href="https://leetcode.cn/problems/spiral-matrix-ii/">螺旋数组II</a></h3>
+<p>给你一个正整数 <code>n</code> ，生成一个包含 <code>1</code> 到 <code>n2</code> 所有元素，且元素按顺时针顺序螺旋排列的 <code>n x n</code> 正方形矩阵 <code>matrix</code> 。</p>
+<p>**算法思路：**模拟法，设定边界。</p>
+<p><img src="/2023/12/01/leetcode/image-20220704212104024.png" alt="image-20220704212104024"></p>
+<figure class="highlight python"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">generateMatrix</span>(<span class="params">self, n: <span class="built_in">int</span></span>) -&gt; <span class="type">List</span>[<span class="type">List</span>[<span class="built_in">int</span>]]:</span><br><span class="line">        <span class="string">"""</span></span><br><span class="line"><span class="string">        初始需要四条边界的初值，初值以及一个0矩阵</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        l, r, t, b = <span class="number">0</span>, n-<span class="number">1</span>, <span class="number">0</span>, n-<span class="number">1</span></span><br><span class="line">        nums, target = <span class="number">1</span>, n*n</span><br><span class="line">        mat = [[<span class="number">0</span> <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="built_in">range</span> (n)] <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="built_in">range</span> (n)]</span><br><span class="line">        <span class="keyword">while</span> nums &lt;= target:</span><br><span class="line">            <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span> (l, r+<span class="number">1</span>):</span><br><span class="line">                mat[t][i] = nums</span><br><span class="line">                nums += <span class="number">1</span></span><br><span class="line">            t += <span class="number">1</span></span><br><span class="line">            <span class="comment"># 上图为例：(1, 3) i先取1，再取2</span></span><br><span class="line">            <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span> (t, b+<span class="number">1</span>):</span><br><span class="line">                mat[i][r] = nums</span><br><span class="line">                nums += <span class="number">1</span></span><br><span class="line">            r -= <span class="number">1</span></span><br><span class="line">            <span class="comment"># 上图为例：(1， -1) i先取1，再取0</span></span><br><span class="line">            <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span> (r, l-<span class="number">1</span> , -<span class="number">1</span>):</span><br><span class="line">                mat[b][i] = nums</span><br><span class="line">                nums += <span class="number">1</span></span><br><span class="line">            b -= <span class="number">1</span></span><br><span class="line">            <span class="comment"># 上图为例：(1,0) i只取1</span></span><br><span class="line">            <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span> (b, t-<span class="number">1</span>, -<span class="number">1</span>):</span><br><span class="line">                mat[i][l] = nums</span><br><span class="line">                nums += <span class="number">1</span></span><br><span class="line">            l += <span class="number">1</span></span><br><span class="line">        <span class="keyword">return</span> mat</span><br></pre></td></tr></tbody></table></figure>
+<h1 id="二-链表"><a class="markdownIt-Anchor" href="#二-链表"></a> 二、链表</h1>
+<h3 id="203-移除链表元素"><a class="markdownIt-Anchor" href="#203-移除链表元素"></a> 203. <a target="_blank" rel="noopener" href="https://leetcode.cn/problems/remove-linked-list-elements/">移除链表元素</a></h3>
+<p>给你一个链表的头节点 <code>head</code> 和一个整数 <code>val</code> ，请你删除链表中所有满足 <code>Node.val == val</code> 的节点，并返回 <strong>新的头节点</strong> 。</p>
+<p>**算法思路：**设置虚拟头结点，统一所有节点的移除操作。</p>
+<ul>
+<li>新建虚拟头结点，并与原链表相连。 <code>dummy_head = ListNode(next=head)</code></li>
+<li>新增指针 <code>cur</code> 指向 <code>dummy_head</code> 头结点来遍历链表，进行循环判断是否移除元素。</li>
+<li>最后返回 <code>dummy_head.next</code> ，原始 <code>head</code> 可能被删除。</li>
+</ul>
+<figure class="highlight python"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">removeElements</span>(<span class="params">self, head: <span class="type">Optional</span>[ListNode], val: <span class="built_in">int</span></span>) -&gt; <span class="type">Optional</span>[ListNode]:</span><br><span class="line">        dummy_head = ListNode(<span class="built_in">next</span> = head)</span><br><span class="line">        cur = dummy_head</span><br><span class="line">        <span class="keyword">while</span>(cur.<span class="built_in">next</span> != <span class="literal">None</span>):</span><br><span class="line">            <span class="keyword">if</span> (cur.<span class="built_in">next</span>.val == val):</span><br><span class="line">                cur.<span class="built_in">next</span> = cur.<span class="built_in">next</span>.<span class="built_in">next</span></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                cur = cur.<span class="built_in">next</span></span><br><span class="line">        <span class="keyword">return</span> dummy_head.<span class="built_in">next</span></span><br></pre></td></tr></tbody></table></figure>
+<h3 id="707-设计链表"><a class="markdownIt-Anchor" href="#707-设计链表"></a> 707. <a target="_blank" rel="noopener" href="https://leetcode.cn/problems/design-linked-list/">设计链表</a></h3>
+<p>设计链表的实现。您可以选择使用单链表或双链表。单链表中的节点应该具有两个属性：<code>val </code> 和 <code> next</code> 。 <code>val </code> 是当前节点的值， <code>next </code> 是指向下一个节点的指针。如果要使用双向链表，则还需要一个属性 <code>prev </code> 以指示链表中的上一个节点。假设链表中的所有节点都是 0-index 的。</p>
+<p>**算法思路：**设置虚拟头结点，统一所有节点的操作。</p>
+<ul>
+<li>一个链节点类（新增节点），一个链表类（操作链表，需设置虚拟头结点）。</li>
+<li>需要遍历链表的操作都要新增cur指针，指向虚拟头结点，用于遍历。</li>
+</ul>
+<h3 id="206-反转链表"><a class="markdownIt-Anchor" href="#206-反转链表"></a> 206. <a target="_blank" rel="noopener" href="https://leetcode.cn/problems/reverse-linked-list/">反转链表</a></h3>
+<p>给你单链表的头节点 <code>head</code> ，请你反转链表，并返回反转后的链表。</p>
+<p><strong>算法思路：</strong> 双指针法依次操作每个结点，循环终止条件为cur为None。</p>
+<figure class="highlight python"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">reverseList</span>(<span class="params">self, head: <span class="type">Optional</span>[ListNode]</span>) -&gt; <span class="type">Optional</span>[ListNode]:</span><br><span class="line">        cur = head</span><br><span class="line">        pre = <span class="literal">None</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span> (cur):</span><br><span class="line">            temp = cur.<span class="built_in">next</span> </span><br><span class="line">            cur.<span class="built_in">next</span> = pre</span><br><span class="line">            pre = cur</span><br><span class="line">            cur = temp</span><br><span class="line">        <span class="keyword">return</span> pre</span><br></pre></td></tr></tbody></table></figure>
+<h3 id="24-两两交换链表中的节点"><a class="markdownIt-Anchor" href="#24-两两交换链表中的节点"></a> 24. <a target="_blank" rel="noopener" href="https://leetcode.cn/problems/swap-nodes-in-pairs/">两两交换链表中的节点</a></h3>
+<p>给你一个链表，两两交换其中相邻的节点，并返回交换后链表的头节点。你必须在不修改节点内部的值的情况下完成本题（即只能进行节点交换）。</p>
+<p><strong>算法思路：</strong></p>
+<ul>
+<li>使用虚拟头节点，新增遍历指针 <code>cur</code> 指向虚拟头节点。</li>
+<li><strong>确定循环终止条件</strong>，分奇偶情况。</li>
+<li>交换节点过程中注意<strong>保存中间节点</strong> 。</li>
+<li>确定 <code>cur</code>  的下次位置。</li>
+</ul>
+<figure class="highlight python"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">swapPairs</span>(<span class="params">self, head: <span class="type">Optional</span>[ListNode]</span>) -&gt; <span class="type">Optional</span>[ListNode]:</span><br><span class="line">        new_node = ListNode(<span class="built_in">next</span>=head)</span><br><span class="line">        cur = new_node</span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span> (cur.<span class="built_in">next</span> <span class="keyword">and</span> cur.<span class="built_in">next</span>.<span class="built_in">next</span>):</span><br><span class="line">            temp1 = cur.<span class="built_in">next</span></span><br><span class="line">            temp2 = cur.<span class="built_in">next</span>.<span class="built_in">next</span>.<span class="built_in">next</span></span><br><span class="line"></span><br><span class="line">            cur.<span class="built_in">next</span> = cur.<span class="built_in">next</span>.<span class="built_in">next</span></span><br><span class="line">            cur.<span class="built_in">next</span>.<span class="built_in">next</span> = temp1</span><br><span class="line">            temp1.<span class="built_in">next</span> = temp2</span><br><span class="line"></span><br><span class="line">            cur = cur.<span class="built_in">next</span>.<span class="built_in">next</span></span><br><span class="line">        <span class="keyword">return</span> new_node.<span class="built_in">next</span></span><br></pre></td></tr></tbody></table></figure>
+<h3 id="19-删除链表的倒数第-n-个结点"><a class="markdownIt-Anchor" href="#19-删除链表的倒数第-n-个结点"></a> 19. <a target="_blank" rel="noopener" href="https://leetcode.cn/problems/remove-nth-node-from-end-of-list/">删除链表的倒数第 N 个结点</a></h3>
+<p>给你一个链表，删除链表的倒数第 <code>n</code> 个结点，并且返回链表的头结点。</p>
+<p><strong>算法思路：</strong>  虚拟头结点+双指针法。要删除倒数第n个结点，让fast移动n+1步，然后让fast和slow同时移动，直到fast指向链表末尾，最后改变slow的指向即可。此处，只有fast移动n+1步后，slow才能指向待删结点的前一个位置。让fast指针先走的目的是为了找到slow。</p>
+<figure class="highlight python"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">removeNthFromEnd</span>(<span class="params">self, head: <span class="type">Optional</span>[ListNode], n: <span class="built_in">int</span></span>) -&gt; <span class="type">Optional</span>[ListNode]:</span><br><span class="line">        new_node = ListNode(<span class="built_in">next</span>=head)</span><br><span class="line">        fast = new_node</span><br><span class="line">        slow = new_node</span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span> (n&gt;=<span class="number">0</span>):</span><br><span class="line">            fast = fast.<span class="built_in">next</span></span><br><span class="line">            n -= <span class="number">1</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span> (fast):</span><br><span class="line">            slow = slow.<span class="built_in">next</span></span><br><span class="line">            fast = fast.<span class="built_in">next</span></span><br><span class="line">        slow.<span class="built_in">next</span> = slow.<span class="built_in">next</span>.<span class="built_in">next</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> new_node.<span class="built_in">next</span></span><br></pre></td></tr></tbody></table></figure>
+<h3 id="142-环形链表-ii"><a class="markdownIt-Anchor" href="#142-环形链表-ii"></a> 142. <a target="_blank" rel="noopener" href="https://leetcode.cn/problems/linked-list-cycle-ii/">环形链表 II</a></h3>
+<p>给定一个链表的头节点  <code>head</code> ，返回链表开始入环的第一个节点。 如果链表无环，则返回 <code>null</code>。</p>
+<p><strong>算法思路：</strong> 双指针法。</p>
+<ul>
+<li>
+<p>快慢指针均指向头结点</p>
+</li>
+<li>
+<p>确定快指针的循环条件（快指针一次走两步，要保证fast和fast-&gt;next不为空）</p>
+</li>
+<li>
+<p>当快慢指针相遇，新增一个指针指向头结点，一个指针指向快或慢指针</p>
+</li>
+<li>
+<p>确定内部循环条件，新增指针指向若不相等则不断后移，当两者相等时，即是入环的第一个节点。</p>
+<figure class="highlight python"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">detectCycle</span>(<span class="params">self, head: <span class="type">Optional</span>[ListNode]</span>) -&gt; <span class="type">Optional</span>[ListNode]:</span><br><span class="line">        slow, fast = head, head</span><br><span class="line">        <span class="keyword">while</span> (fast <span class="keyword">and</span> fast.<span class="built_in">next</span>):</span><br><span class="line">            fast = fast.<span class="built_in">next</span>.<span class="built_in">next</span></span><br><span class="line">            slow = slow.<span class="built_in">next</span></span><br><span class="line">            <span class="keyword">if</span> (slow==fast):</span><br><span class="line">                index1 = slow</span><br><span class="line">                index2 = head</span><br><span class="line">                <span class="keyword">while</span> (index1 != index2):</span><br><span class="line">                    index1 = index1.<span class="built_in">next</span></span><br><span class="line">                    index2 = index2.<span class="built_in">next</span></span><br><span class="line">                <span class="keyword">return</span> index2</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line">    </span><br></pre></td></tr></tbody></table></figure>
+</li>
+</ul>
+<h1 id="三-哈希表"><a class="markdownIt-Anchor" href="#三-哈希表"></a> 三、哈希表</h1>
+<p><strong>要快速判断一个元素是否出现或是否在集合里的时候，就要考虑哈希法</strong>。但是哈希法是牺牲了空间换取了时间，要使用额外的数组，set或者是map来存放数据，才能实现快速的查找。</p>
+<h3 id="242-有效的字母异位词"><a class="markdownIt-Anchor" href="#242-有效的字母异位词"></a> 242. <a target="_blank" rel="noopener" href="https://leetcode.cn/problems/valid-anagram/"> 有效的字母异位词</a></h3>
+<p>给定两个字符串 <code>s</code> 和 <code>t</code> ，编写一个函数来判断 <code>t</code> 是否是 <code>s</code> 的字母异位词。</p>
+<p><strong>算法思路：</strong> 定义一个数组，来记录字符串s里字符出现的次数。</p>
+<figure class="highlight python"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">isAnagram</span>(<span class="params">self, s: <span class="built_in">str</span>, t: <span class="built_in">str</span></span>) -&gt; <span class="built_in">bool</span>:</span><br><span class="line">        record = [<span class="number">0</span>] * <span class="number">26</span></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> s:</span><br><span class="line">            record[<span class="built_in">ord</span>(i) - <span class="built_in">ord</span>(<span class="string">"a"</span>)] += <span class="number">1</span></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> t:</span><br><span class="line">            record[<span class="built_in">ord</span>(i) - <span class="built_in">ord</span>(<span class="string">"a"</span>)] -= <span class="number">1</span></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">26</span>):</span><br><span class="line">            <span class="keyword">if</span> record[i] != <span class="number">0</span>:</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">True</span></span><br></pre></td></tr></tbody></table></figure>
+<h3 id="349-两个数组的交集"><a class="markdownIt-Anchor" href="#349-两个数组的交集"></a> 349. <a target="_blank" rel="noopener" href="https://leetcode.cn/problems/intersection-of-two-arrays/">两个数组的交集</a></h3>
+<p>给定两个数组 <code>nums1</code> 和 <code>nums2</code> ，返回 它们的交集 。输出结果中的每个元素一定是 <strong>唯一</strong> 的。我们可以 <strong>不考虑输出结果的顺序</strong> 。</p>
+<p><strong>算法思路：</strong> 如果数值过大，哈希值跨度大，一般使用set结构来存放数据。<br>
+ps：<code>std::set</code> 和 <code>std::multiset</code> 底层实现都是红黑树， <code>std::unordered_set</code> 的底层实现是哈希表， 使用 <code>unordered_set </code> 读写效率是最高的，并不需要对数据进行排序，而且还不要让数据重复，所以选择 <code>unordered_set</code> 。直接使用set 不仅占用空间比数组大，而且速度要比数组慢，set把数值映射到key上都要做hash计算的。</p>
+<figure class="highlight python"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">intersection</span>(<span class="params">self, nums1: <span class="type">List</span>[<span class="built_in">int</span>], nums2: <span class="type">List</span>[<span class="built_in">int</span>]</span>) -&gt; <span class="type">List</span>[<span class="built_in">int</span>]:</span><br><span class="line">        <span class="built_in">hash</span> = {}</span><br><span class="line">        ans = []</span><br><span class="line">        <span class="keyword">for</span> num <span class="keyword">in</span> nums1:</span><br><span class="line">            <span class="built_in">hash</span>[num] = <span class="number">1</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> num <span class="keyword">in</span> nums2:</span><br><span class="line">            <span class="keyword">if</span> num <span class="keyword">in</span> <span class="built_in">hash</span>.keys() <span class="keyword">and</span> <span class="built_in">hash</span>[num] == <span class="number">1</span>:</span><br><span class="line">                ans.append(num)</span><br><span class="line">                <span class="built_in">hash</span>[num] = <span class="number">0</span>	<span class="comment">#去重</span></span><br><span class="line">        <span class="keyword">return</span> ans</span><br></pre></td></tr></tbody></table></figure>
+<h3 id="1-两数之和"><a class="markdownIt-Anchor" href="#1-两数之和"></a> 1. <a target="_blank" rel="noopener" href="https://leetcode.cn/problems/two-sum/">两数之和</a></h3>
+<p>给定一个整数数组 <code>nums</code>  和一个整数目标值 <code>target</code> ，请你在该数组中找出 和为目标值 <code>target</code> 的那两个整数，并返回它们的数组下标。你可以假设每种输入只会对应一个答案。但是，数组中同一个元素在答案里不能重复出现。</p>
+<p><strong>算法思路：</strong> 利用哈希表map来缩短寻找 <code>target - x</code> 的时间。是否存在元素，所以元素是key，返回下标，下标即value</p>
+<figure class="highlight python"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">twoSum</span>(<span class="params">self, nums: <span class="type">List</span>[<span class="built_in">int</span>], target: <span class="built_in">int</span></span>) -&gt; <span class="type">List</span>[<span class="built_in">int</span>]:</span><br><span class="line">        <span class="built_in">hash</span> = {}</span><br><span class="line">        <span class="keyword">for</span> i, num <span class="keyword">in</span> <span class="built_in">enumerate</span>(nums):</span><br><span class="line">            <span class="keyword">if</span> target-num <span class="keyword">in</span> <span class="built_in">hash</span>:</span><br><span class="line">                <span class="keyword">return</span> [<span class="built_in">hash</span>[target-num], i]</span><br><span class="line">            <span class="built_in">hash</span>[nums[i]]= i</span><br><span class="line">        <span class="keyword">return</span> []</span><br></pre></td></tr></tbody></table></figure>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>CY</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>Permalink:</span>
+                        <span><a href="http://example.com/2023/12/01/leetcode/">http://example.com/2023/12/01/leetcode/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>Do you believe in <strong>DESTINY</strong>?</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/code/"># code</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+            
+            <a class="next" rel="next" href="/2023/12/01/git/">git</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+
+
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.min.js"></script>
+<div id="gitalk-container"></div>
+<script type="text/javascript">
+      var gitalk = new Gitalk({
+        clientID: '9810f94b2996825e7931',
+        clientSecret: 'c1aee8c436730130e3ad18694d20888a1ee13bce',
+        repo: 'Seperendity.github.io',
+        owner: 'Seperendity',
+        admin: 'Seperendity',
+        id: location.pathname,
+        labels: 'Gitalk'.split(',').filter(l => l),
+        perPage: 10,
+        pagerDirection: 'last',
+        createIssueManually: true,
+        distractionFreeMode: false
+      })
+      gitalk.render('gitalk-container')
+</script>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© CY | 2022 - 2023 😉 Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a>
+		|
+		<!-- 访客数量 -->
+		
+		  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+<span class="site-uv">
+
+  <i class="iconfont icon-yonghu "></i>
+
+ <i class="busuanzi-value" id="busuanzi_value_site_uv"></i>
+
+</span>&nbsp;
+
+
+
+
+
+<span class="site-pv">
+
+ <i class="iconfont icon-jiaoyinzujifangke "></i>
+
+ <i class="busuanzi-value" id="busuanzi_value_site_pv"></i>
+
+</span>
+
+
+		
+		</span>
+    </div>
+</footer>
+
+<script>
+    $(document).ready(function () {
+
+        var int = setInterval(fixCount, 50);  // 50ms周期检测函数
+        var pvcountOffset = 80000;  // 初始化首次数据
+        var uvcountOffset = 20000;
+
+        function fixCount() {
+            if (document.getElementById("busuanzi_container_site_pv").style.display != "none") {
+                $("#busuanzi_value_site_pv").html(parseInt($("#busuanzi_value_site_pv").html()) + pvcountOffset);
+                clearInterval(int);
+            }
+            if ($("#busuanzi_container_site_pv").css("display") != "none") {
+                $("#busuanzi_value_site_uv").html(parseInt($("#busuanzi_value_site_uv").html()) + uvcountOffset); // 加上初始数据 
+                clearInterval(int); // 停止检测
+            }
+        }
+    });
+</script>
+
+    </div>
+	
+	<!-- 搜索功能 -->
+	<!-- Chic/layout.ejs -->
+	<div id="u-search">
+		<div class="modal">
+			<div class="modal-header">
+				<div class="container">
+					<form id="u-search-modal-form" class="u-search-modal-form">
+						<button type="submit" class="form-submit-btn">
+							<img src="/image/search.png" class="search-btn-img" />
+						</button>
+						<input placeholder="搜索内容..." class="form-input" id="modal-form-input">
+					</form>
+					<a class="modal-close">x</a>
+				</div>
+				<div class="search-loading">
+					<div class="search-loading-bar"></div>
+				</div>
+			</div>
+			<div class="modal-body">
+			</div>
+		</div>
+		<div class="modal-overlay"></div>
+	</div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"log":false,"model":{"jsonPath":"/live2dw/assets/haruto.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":true},"react":{"opacity":0.7}});</script></body>
+<script>
+!
+function() {
+    function n(n, e, t) {
+        return n.getAttribute(e) || t
+    }
+    function e(n) {
+        return document.getElementsByTagName(n)
+    }
+    function t() {
+        var t = e("script"),
+        o = t.length,
+        i = t[o - 1];
+        return {
+            l: o,
+            z: n(i, "zIndex", -1),     //置于主页面背后
+            o: n(i, "opacity", .5),     //线条透明度
+            c: n(i, "color", "0,0,0"),  //线条颜色
+            n: n(i, "count", 100)    //线条数量
+        }
+    }
+    function o() {
+        a = m.width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth,
+        c = m.height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
+    }
+    function i() {
+        r.clearRect(0, 0, a, c);
+        var n, e, t, o, m, l;
+        s.forEach(function(i, x) {
+            for (i.x += i.xa, i.y += i.ya, i.xa *= i.x > a || i.x < 0 ? -1 : 1, i.ya *= i.y > c || i.y < 0 ? -1 : 1, r.fillRect(i.x - .5, i.y - .5, 1, 1), e = x + 1; e < u.length; e++) n = u[e],
+            null !== n.x && null !== n.y && (o = i.x - n.x, m = i.y - n.y, l = o * o + m * m, l < n.max && (n === y && l >= n.max / 2 && (i.x -= .03 * o, i.y -= .03 * m), t = (n.max - l) / n.max, r.beginPath(), r.lineWidth = t / 2, r.strokeStyle = "rgba(" + d.c + "," + (t + .2) + ")", r.moveTo(i.x, i.y), r.lineTo(n.x, n.y), r.stroke()))
+        }),
+        x(i)
+    }
+    var a, c, u, m = document.createElement("canvas"),
+    d = t(),
+    l = "c_n" + d.l,
+    r = m.getContext("2d"),
+    x = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
+    function(n) {
+        window.setTimeout(n, 1e3 / 45)
+    },
+    w = Math.random,
+    y = {
+        x: null,
+        y: null,
+        max: 2e4
+    };
+    m.id = l,
+    m.style.cssText = "position:fixed;top:0;left:0;z-index:" + d.z + ";opacity:" + d.o,
+    e("body")[0].appendChild(m),
+    o(),
+    window.onresize = o,
+    window.onmousemove = function(n) {
+        n = n || window.event,
+        y.x = n.clientX,
+        y.y = n.clientY
+    },
+    window.onmouseout = function() {
+        y.x = null,
+        y.y = null
+    };
+    for (var s = [], f = 0; d.n > f; f++) {
+        var h = w() * a,
+        g = w() * c,
+        v = 2 * w() - 1,
+        p = 2 * w() - 1;
+        s.push({
+            x: h,
+            y: g,
+            xa: v,
+            ya: p,
+            max: 6e3
+        })
+    }
+    u = s.concat([y]),
+    setTimeout(function() {
+        i()
+    },
+    100)
+} ();
+</script>
+
+<script type='text/javascript' id='clustrmaps' src='//cdn.clustrmaps.com/map_v2.js?cl=ffffff&w=350&t=m&d=1NqKKNlM62oDkLYA7mQMmVg49mUH_Ib-6MkRgvd04o8&co=2d78ad&cmo=ffc253&cmn=ff5353&ct=ffffff'></script>
+
+</html>
