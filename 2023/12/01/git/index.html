@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="CY">
+
+
+
+
+
+<title>git | Serendipity</title>
+
+
+
+    <link rel="icon" href="/bitbug_favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+    <link rel="stylesheet" href="/../fonts/iconfont2/iconfont.css">
+    
+    <link rel="stylesheet" href="/../fonts/iconfont3/iconfont.css">
+    
+    <link rel="stylesheet" href="/../fonts/iconfont4/iconfont.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+    <script src="/js/jquery-3.6.0.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+<!-- 搜索的部分 -->
+
+
+
+    <script>
+    function searchToggle() {
+        const width = $(document.body).width()
+        if(width > 479) {
+            return;
+        }
+        const search = $('.search');
+		const searchForm = $('.form-search')
+		const menuToggle = $('.menu-toggle');
+		const title = $('.navbar-header-title ');
+
+        if(!search.hasClass("mobile-search")) {
+            search.addClass("mobile-search");
+			menuToggle.addClass("open-search")
+			title.addClass("mobile-title-hidden")
+        } else {
+            search.removeClass("mobile-search");
+			menuToggle.removeClass("open-search")
+			// title.css({visibility: 'visible'})
+			title.removeClass("mobile-title-hidden")
+        } 
+    }
+
+    function searchToggle() {
+        const width = $(document.body).width()
+        if(width > 479) {
+            return;
+        }
+        const search = $('.search');
+        const searchForm = $('.form-search');
+        const menuToggle = $('.menu-toggle');
+        const title = $('.navbar-header-title ');
+
+        if(!search.hasClass("mobile-search")) {
+            search.addClass("mobile-search");
+            menuToggle.addClass("open-search")
+            title.addClass("mobile-title-hidden")
+        } else {
+            search.removeClass("mobile-search");
+            menuToggle.removeClass("open-search")
+            // title.css({visibility: 'visible'})
+            title.removeClass("mobile-title-hidden")
+        } 
+    }
+
+
+
+    function search(searchInputEl, formEl, flag) {
+        const path = "/" + "search.json"; // 可以在public 下查看这个search.json
+        $(formEl).submit(function(e){
+            e.preventDefault();
+            let target = null
+            if(searchInputEl == null) {
+                const screenWidth = $(document.body).width();
+                target = screenWidth > 479 ? $('#pc-search-input') : $('#mobile-search-input');
+                console.log(target);
+            } else {
+                target = $(searchInputEl)
+            }
+
+            if(!flag && target.val() === '') {
+                return ;
+            }
+
+            $("#u-search").fadeIn(500, function() {
+                $("body > .wrapper").addClass("modal-active");
+
+                $.ajax({
+                    url: path,
+                    dataType: "json",
+                    beforeSend: function (xhr) {
+                        $input = target.val();
+                        $(".form-input").val($input);
+                        const loadingBar = $('.search-loading-bar') 
+                        loadingBar.css({
+                            width:'100%',
+                            display: 'block'
+                        });
+                    },
+                    success: function( datas ) {
+                        console.log(datas);
+                        const $resultPanel = $(".modal-body")[0];
+                        let str = `<ul class="modal-results">`;
+                        var keywords = $(".form-input").val().trim().toLowerCase().split(/[\s\-]+/);
+                        $resultPanel.innerHTML = "";
+                        let hasResult = false
+                        let text = `<div class="no-result">找不到与关键词相关的内容....</div>`;
+
+                        if ($(".form-input").val().trim().length <= 0) {
+                            // 没有结果
+                            $resultPanel.innerHTML = text;
+                            return;
+                        }
+                        datas.forEach(function (data, index) {
+                            var isMatch = true;
+                            if (!data.title || data.title.trim() === '') {
+                                data.title = "Untitled";
+                            }
+                            var data_title = data.title.trim().toLowerCase();
+                            var data_content = data.content && data.content.trim().replace(/<[^>]+>/g, "").toLowerCase() || '';
+                            var data_url = data.url;
+                            var index_title = -1;
+                            var index_content = -1;
+                            var first_occur = -1;
+                            // only match artiles with not empty contents
+                            if (data_content !== '') {
+                                keywords.forEach(function (keyword, i) {
+                                    index_title = data_title.indexOf(keyword);
+                                    index_content = data_content.indexOf(keyword);
+
+                                    if (index_title < 0 && index_content < 0) {
+                                        isMatch = false;
+                                    } else {
+                                        hasResult = true
+                                        if (index_content < 0) {
+                                            index_content = 0;
+                                        }
+                                        if (i == 0) {
+                                            first_occur = index_content;
+                                        }
+                                    }
+                                });
+                            } else {
+                                isMatch = false;
+                            }
+                            // show search results
+                            if (isMatch) {
+                                str += `<li class='result-item'><a href='${data_url}' class='result-item-detail'> <span class="title">${data_title}</span>`;
+                                var content = data.content.trim().replace(/<[^>]+>/g, "");
+                                if (first_occur >= 0) {
+                                    // cut out 200 characters
+                                    var start = first_occur - 40;
+                                    var end = first_occur + 160;
+
+                                    if (start < 0) {
+                                        start = 0;
+                                    }
+
+                                    if (start == 0) {
+                                        end = 200;
+                                    }
+
+                                    if (end > content.length) {
+                                        end = content.length;
+                                    }
+
+                                    var match_content = content.substring(start, end);
+
+                                    // highlight all keywords
+                                    keywords.forEach(function (keyword) {
+                                        var regS = new RegExp(keyword, "gi");
+                                        match_content = match_content.replace(regS, `<em class="search-keyword">${keyword}</em>`);
+                                    });
+
+                                    str += `<span class="content"> ${match_content} ...</span></a>`;
+                                }
+                                str += "</li>";
+                            }
+                        });
+                        str += "</ul>";
+                        if(hasResult) {
+                            $resultPanel.innerHTML = str;
+                        } else {
+                            $resultPanel.innerHTML = text;
+                        }
+
+                    },
+                    complete: function() {
+                        setTimeout(() => {
+                                const loadingBar = $('.search-loading-bar') 
+                                loadingBar.css({
+                                    width:'0%',
+                                    display: 'none'
+                                });
+                        }, 300)
+                    }
+                });
+            })
+
+        });
+    }
+
+    $(document).ready(function() {
+        $('.modal-close').click(function () { 
+            $("#u-search").fadeOut();
+            $("body > .wrapper").removeClass("modal-active")
+        })
+
+        $('.modal-overlay').click(function() {
+            $("#u-search").fadeOut();
+            $("body > .wrapper").removeClass("modal-active")
+        })
+        search(null, ".form-search", false)
+        search("#u-search-modal-form .form-input", ".u-search-modal-form", true)
+    })
+</script>
+
+<meta name="generator" content="Hexo 6.1.0">
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <!-- div class="navbar-header header-logo"><a href="/">CY&#39;s Blog</a></div -->
+			<div class="navbar-header header-logo"><a href="/"><i class="iconfont icon-zhuye" style="font-size: 1em;"></i>CY&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+				<!-- 这里表示的是pc端搜索框 -->
+				
+				
+    <div class="search ">
+        <div class="search-btn" onClick="searchToggle()">
+            <img src="/image/search.png" class="search-btn-img" />
+        </div>
+        <form class="form-search">
+            <input class="input" placeholder="点此搜索" autocomplete="off" id="pc-search-input"/>
+        </form>
+    </div>
+
+
+                
+                <a class="menu-item" href="/archives">📚Posts</a>
+                
+                <a class="menu-item" href="/category">📁Categories</a>
+                
+                <a class="menu-item" href="/tag">🏷️Tags</a>
+                
+                <a class="menu-item" href="/about">📑About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">CY&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+				<div class="navbar-mobile-right">
+					
+					
+    <div class="search ">
+        <div class="search-btn" onClick="searchToggle()">
+            <img src="/image/search.png" class="search-btn-img" />
+        </div>
+        <form class="form-search">
+            <input class="input" placeholder="点此搜索" autocomplete="off" id="mobile-search-input"/>
+        </form>
+    </div>
+
+
+					<div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+				</div>
+				
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                <a class="menu-item" href="/archives">📚Posts</a>
+                
+                <a class="menu-item" href="/category">📁Categories</a>
+                
+                <a class="menu-item" href="/tag">🏷️Tags</a>
+                
+                <a class="menu-item" href="/about">📑About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">git</h1>
+            
+                <div class="post-meta">
+                    
+                        👨‍🎓Author: <a itemprop="author" rel="author" href="/">CY</a>
+                    
+
+                    
+                        <span class="post-time">
+                        📅Date: <a href="#">December 1, 2023&nbsp;&nbsp;23:11:47</a>
+                        </span>
+                    
+                    
+					
+					
+						<span class="post-count">
+					📑Words:
+						<a href="">2.4k</a>
+						</span>
+					
+					
+						<span class="post-count">
+					⏱️Time:
+						<a href="">8min</a>  
+						</span>
+					
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h1 id="一-git的简介"><a class="markdownIt-Anchor" href="#一-git的简介"></a> 一、Git的简介</h1>
+<p>Git 是一个开源的<strong>分布式</strong>版本控制系统，用于敏捷高效地处理任何或小或大的项目。</p>
+<p>Git 工作区、暂存区和版本库、本地仓库的概念：</p>
+<ul>
+<li>**工作区：**电脑里能看见（非隐藏）的工作目录。</li>
+<li>**暂存区：**英文叫  <code>stage </code> 或  <code>index</code> ，<strong>暂存区域是一个文件，保存了下次将提交的文件列表信息</strong>。一般存放在  <code>.git</code> 目录下的 <code>index</code> 文件（.git/index）中，所以我们把暂存区有时也叫作索引（index）。</li>
+<li>**版本库：**工作区有一个隐藏目录 <code>.git</code> ，这个不算工作区，<strong>保存项目的元数据和对象数据库</strong>，用来跟踪管理仓库。</li>
+<li><strong>本地仓库：</strong> 本地仓库保存了对象被提交过的各个版本。<code>git commit</code> 后同步index的目录树到本地仓库，方便从下一步通过 <code>git push</code> 同步本地仓库与远程仓库。说明如下：
+<ul>
+<li>只有把修改提交到本地仓库，该修改才能在仓库中留下痕迹</li>
+<li>可以在任何地方新建本地仓库，只需要在目标目录下执行 <code>git init</code> 指令，就会将此目录自动初始化为本地仓库，同时它会新建 <code>.git</code> 目录</li>
+</ul>
+</li>
+</ul>
+<p>工作区、版本库中的暂存区和版本库之间的关系：</p>
+<p><img src="/2023/12/01/git/image-20221218210558964.png" alt="image-20221218210558964"></p>
+<ul>
+<li>“HEAD” 实际是指向 master 分支的一个"游标"。</li>
+<li>objects 标识的区域为 Git 的对象库，实际位于 “.git/objects” 目录下，其包含了创建的各种对象及内容。</li>
+<li>当对<strong>工作区</strong>修改（或新增）的文件执行 git add 命令时，<strong>暂存区的目录树被更新</strong>，同时工作区修改（或新增）的文件内容被写入到对象库中的一个新的对象中，而<strong>该对象的ID被记录在暂存区的文件索引中</strong>。</li>
+<li>当执行提交操作（git commit）时，暂存区的目录树写到版本库（对象库）中，master 分支会做相应的更新。即 master 指向的目录树就是提交时暂存区的目录树。 <strong>实现master和暂存区的联系</strong></li>
+<li>当执行 git reset HEAD 命令时，暂存区的目录树会被重写，被 master 分支指向的目录树所替换，但是工作区不受影响。</li>
+<li>当执行 git rm --cached <file> 命令时，会直接从暂存区删除文件，工作区则不做出改变。</file></li>
+<li>当执行 git checkout . 或者  git checkout – <file> 命令时，<strong>会用暂存区全部或指定的文件替换工作区的文件</strong>。这个操作很危险，会清除工作区中未添加到暂存区中的改动。</file></li>
+<li>当执行 git checkout HEAD . 或者 git checkout HEAD <file> 命令时，<strong>会用 HEAD 指向的 master 分支中的全部或者部分文件替换暂存区和以及工作区中的文件</strong>。这个命令也是极具危险性的，因为不但会清除工作区中未提交的改动，也会清除暂存区中未提交的改动。</file></li>
+</ul>
+<h2 id="二-git的配置"><a class="markdownIt-Anchor" href="#二-git的配置"></a> 二、Git的配置</h2>
+<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># git的配置列表</span></span><br><span class="line">git config --list</span><br><span class="line"></span><br><span class="line"><span class="comment"># 前提：在仓库中进行</span></span><br><span class="line"><span class="comment"># 编辑 git 配置文件:</span></span><br><span class="line">git config -e    <span class="comment"># 针对当前仓库 </span></span><br><span class="line">git config -e --global   <span class="comment"># 针对系统上所有仓库</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置提交代码时的用户信息：</span></span><br><span class="line">git config --global user.name <span class="string">"runoob"</span></span><br><span class="line">git config --global user.email <span class="built_in">test</span>@runoob.com</span><br><span class="line"></span><br><span class="line"><span class="comment"># 如果去掉 --global 参数只对当前仓库有效</span></span><br></pre></td></tr></tbody></table></figure>
+<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Github配置：ssh方式</span></span><br><span class="line"><span class="comment"># 生成SSH key </span></span><br><span class="line">ssh-keygen -t rsa -C <span class="string">'...@163.com'</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Github 左边选择 SSH and GPG keys，然后点击 New SSH key。</span></span><br><span class="line"><span class="comment"># title可以任意填，key为C:/Users/.../.ssh/id_rsa.pub中的内容。</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 为了验证是否成功，输入以下命令：</span></span><br><span class="line">ssh -T git@github.com</span><br></pre></td></tr></tbody></table></figure>
+<h2 id="三-创建仓库"><a class="markdownIt-Anchor" href="#三-创建仓库"></a> 三、创建仓库</h2>
+<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用当前目录作为 Git 仓库，该命令执行完后会在当前目录生成一个 .git 目录。</span></span><br><span class="line"><span class="comment"># 当你执行 git init 的时候，默认情况下 Git 就会为你创建 master/main 分支。</span></span><br><span class="line">git init</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用指定目录作为Git仓库</span></span><br><span class="line"><span class="comment"># 初始化后，会在 newrepo 目录下会出现一个名为 .git 的目录，所有 Git 需要的数据和资源都存放在这个目录</span></span><br><span class="line">git init newrepo</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加远程仓库</span></span><br><span class="line">git remote add origin git@github.com:.../PytorchTutorial.git</span><br><span class="line"><span class="comment"># 本地仓库分支关联远程仓库分支（可选）,注意在此之前要先git add / git commit</span></span><br><span class="line"><span class="comment"># 关联目的是如果在本地分支下操作： git pull , git push ，不需要指定在命令行指定远程的分支． </span></span><br><span class="line">git branch –set-upstream-to=origin/master master</span><br></pre></td></tr></tbody></table></figure>
+<h2 id="四-基本操作"><a class="markdownIt-Anchor" href="#四-基本操作"></a> 四、基本操作</h2>
+<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> ***</span><br><span class="line"><span class="comment"># git pull会下载当前正在工作的分支对应的远端内容</span></span><br><span class="line"><span class="comment"># 并且在下载成功之后马上执行一个git merge命令，为新下载下来的远端内容创建一次merge commit。</span></span><br><span class="line">git pull      下载远程代码并合并 </span><br><span class="line"><span class="comment"># git pull origin master --allow-unrelated-histories</span></span><br><span class="line">git add       添加文件到暂存区</span><br><span class="line">git commit    将暂存区内容添加到仓库中</span><br><span class="line"><span class="comment"># 在 Linux 系统中，commit 信息使用单引号 '，Windows 系统，commit 信息使用双引号 "</span></span><br><span class="line">git push 	  上传远程代码并合并</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># ————————————————————————————————</span></span><br><span class="line"><span class="comment"># Git 的工作就是创建和保存你的项目的快照及与之后的快照进行对比。</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 提交与修改</span></span><br><span class="line">git status 	查看仓库当前的状态，显示有变更的文件</span><br><span class="line">git diff 	比较文件的不同，即暂存区和工作区的差异</span><br><span class="line">git reset 	回退版本</span><br><span class="line">git <span class="built_in">rm</span> 	    删除工作区文件</span><br><span class="line">git <span class="built_in">mv</span> 	    移动或重命名工作区文件</span><br><span class="line"><span class="comment"># 提交日志</span></span><br><span class="line">git <span class="built_in">log</span> 	查看历史提交记录</span><br><span class="line">git blame &lt;file&gt; 	以列表形式查看指定文件的历史修改记录</span><br><span class="line"><span class="comment"># 远程操作</span></span><br><span class="line">git remote 	远程仓库操作</span><br><span class="line"><span class="comment"># git remote add coworkers_repo git@bitbucket.org:coworker/coworkers_repo.git</span></span><br><span class="line">git fetch 	从远程获取代码库</span><br><span class="line"><span class="comment"># git fetch命令从远端仓库中下载commits, files, refs到本地仓库中，</span></span><br><span class="line"><span class="comment"># 但是fetch命令并不强迫让远端的变更合# 并到你的仓库。</span></span><br><span class="line"><span class="comment"># Git会对本地内容与fetch下载的内容进行隔离</span></span><br><span class="line"><span class="comment"># 这就保证了fetch命令更新的远端变更不会对本地正在进行的开发工作产生任何影响</span></span><br></pre></td></tr></tbody></table></figure>
+<p>.git文件夹</p>
+<ul>
+<li>本地分支的refs保存在<code>./.git/refs/heads/</code>文件夹下</li>
+<li>远端分支的refs存储在<code>./.git/refs/remotes/</code>文件夹下（<code>git branch -r</code>查看远端分支 + git checkout）</li>
+<li>objects 标识的区域为 Git 的对象库，实际位于 “.git/objects” 目录下，其包含了创建的各种对象及内容。</li>
+</ul>
+<h2 id="五-分支管理"><a class="markdownIt-Anchor" href="#五-分支管理"></a> 五、分支管理</h2>
+<p>几乎每一种版本控制系统都以某种形式支持分支，一个分支代表一条独立的开发线。</p>
+<p>使用分支意味着你可以从开发主线上分离开来，然后在不影响主线的同时继续工作。</p>
+<p>Git 分支实际上是指向更改快照的指针。</p>
+<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 列出本地分支，-r 列出远程分支</span></span><br><span class="line">git branch</span><br><span class="line"><span class="comment"># 创建分支：当你执行 git init 的时候，默认情况下 Git 就会为你创建 master 分支。</span></span><br><span class="line">git branch (branchname)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 切换分支</span></span><br><span class="line">git checkout (branchname) </span><br><span class="line"><span class="comment"># git checkout -b (branchname) 命令来创建新分支并立即切换到该分支下，从而在该分支中操作</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 删除分支命令</span></span><br><span class="line">git branch -d (branchname)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 分支合并:可以使用以下命令将任何分支合并到当前分支中去：</span></span><br><span class="line">git merge</span><br><span class="line"><span class="comment"># 合并完后就可以删除分支</span></span><br><span class="line">git branch -d newtest</span><br><span class="line"></span><br><span class="line"><span class="comment"># 合并冲突</span></span><br></pre></td></tr></tbody></table></figure>
+<h2 id="查看提交历史"><a class="markdownIt-Anchor" href="#查看提交历史"></a> 查看提交历史</h2>
+<p>Git 提交历史一般常用两个命令：</p>
+<ul>
+<li><strong>git log</strong> - 查看历史提交记录。</li>
+<li><strong>git blame <file></file></strong> - 以列表形式查看指定文件的历史修改记录。</li>
+</ul>
+<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用 git log 命令列出历史提交记录</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 可以用 --oneline 选项来查看历史记录的简洁的版本</span></span><br><span class="line">git <span class="built_in">log</span> --oneline</span><br><span class="line"></span><br><span class="line"><span class="comment"># 可以用 --graph 选项，查看历史中什么时候出现了分支、合并。</span></span><br><span class="line"><span class="comment"># 可以用 --reverse 参数来逆向显示所有日志</span></span><br></pre></td></tr></tbody></table></figure>
+<h3 id="为什么会发生合并冲突"><a class="markdownIt-Anchor" href="#为什么会发生合并冲突"></a> 为什么会发生合并冲突？</h3>
+<p>提示：以两个分支为例</p>
+<ul>
+<li>git找到两个分支的ancestor commit，在当前情况下，ancestor commit为两个分支的分叉口。</li>
+<li>记录两分支在ancestor commit之后的修改记录（文本文件记录起始行号和修改范围）。</li>
+<li>最后生成合并结果，有三种情况：
+<ul>
+<li>只有一条分支进行了修改，此时判断没有发生冲突；</li>
+<li>两条分支都进行了修改，但是修改记录没有发生重叠，则没有发生冲突；</li>
+<li>两条分支都进行了修改，并且修改记录发生了重叠，则发生了冲突。</li>
+</ul>
+</li>
+</ul>
+<h3 id="理解git-diff命令"><a class="markdownIt-Anchor" href="#理解git-diff命令"></a> 理解git diff命令</h3>
+<p>git diff 用来比较文件之间的不同，其基本用法如下。</p>
+<ul>
+<li>
+<p>git diff：显示工作目录(working tree)与索引区(即暂存区快照，index，就是git add过的)之间的文件变更，即显示未被add的文件变更。</p>
+</li>
+<li>
+<p>git diff --cached 或 git diff --staged：显示索引区和最后一次commit(HEAD)之间的文件更改，即显示已add但还未commit的文件变更。也即用"git commit"（不带-a）将被提交的文件变更。</p>
+</li>
+<li>
+<p>git diff HEAD：显示工作目录与最后一次commit之间的文件变更，即显示所有未commit（包括未add和add两类）的文件变更。也即用"git commit -a”将被提交的文件变更。</p>
+</li>
+<li>
+<p>git diff &lt;分支名1&gt; &lt;分支名2&gt; ：比较两个分支上最后 commit 的内容的差别。以<strong>分支1</strong>为基础进行比较的。</p>
+</li>
+</ul>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>CY</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>Permalink:</span>
+                        <span><a href="http://example.com/2023/12/01/git/">http://example.com/2023/12/01/git/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>Do you believe in <strong>DESTINY</strong>?</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/code/"># code</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+            
+            <a class="next" rel="next" href="/2023/10/12/Multimodal-learning/">Multimodal_learning</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+
+
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.min.js"></script>
+<div id="gitalk-container"></div>
+<script type="text/javascript">
+      var gitalk = new Gitalk({
+        clientID: '9810f94b2996825e7931',
+        clientSecret: 'c1aee8c436730130e3ad18694d20888a1ee13bce',
+        repo: 'Seperendity.github.io',
+        owner: 'Seperendity',
+        admin: 'Seperendity',
+        id: location.pathname,
+        labels: 'Gitalk'.split(',').filter(l => l),
+        perPage: 10,
+        pagerDirection: 'last',
+        createIssueManually: true,
+        distractionFreeMode: false
+      })
+      gitalk.render('gitalk-container')
+</script>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© CY | 2022 - 2023 😉 Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a>
+		|
+		<!-- 访客数量 -->
+		
+		  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+<span class="site-uv">
+
+  <i class="iconfont icon-yonghu "></i>
+
+ <i class="busuanzi-value" id="busuanzi_value_site_uv"></i>
+
+</span>&nbsp;
+
+
+
+
+
+<span class="site-pv">
+
+ <i class="iconfont icon-jiaoyinzujifangke "></i>
+
+ <i class="busuanzi-value" id="busuanzi_value_site_pv"></i>
+
+</span>
+
+
+		
+		</span>
+    </div>
+</footer>
+
+<script>
+    $(document).ready(function () {
+
+        var int = setInterval(fixCount, 50);  // 50ms周期检测函数
+        var pvcountOffset = 80000;  // 初始化首次数据
+        var uvcountOffset = 20000;
+
+        function fixCount() {
+            if (document.getElementById("busuanzi_container_site_pv").style.display != "none") {
+                $("#busuanzi_value_site_pv").html(parseInt($("#busuanzi_value_site_pv").html()) + pvcountOffset);
+                clearInterval(int);
+            }
+            if ($("#busuanzi_container_site_pv").css("display") != "none") {
+                $("#busuanzi_value_site_uv").html(parseInt($("#busuanzi_value_site_uv").html()) + uvcountOffset); // 加上初始数据 
+                clearInterval(int); // 停止检测
+            }
+        }
+    });
+</script>
+
+    </div>
+	
+	<!-- 搜索功能 -->
+	<!-- Chic/layout.ejs -->
+	<div id="u-search">
+		<div class="modal">
+			<div class="modal-header">
+				<div class="container">
+					<form id="u-search-modal-form" class="u-search-modal-form">
+						<button type="submit" class="form-submit-btn">
+							<img src="/image/search.png" class="search-btn-img" />
+						</button>
+						<input placeholder="搜索内容..." class="form-input" id="modal-form-input">
+					</form>
+					<a class="modal-close">x</a>
+				</div>
+				<div class="search-loading">
+					<div class="search-loading-bar"></div>
+				</div>
+			</div>
+			<div class="modal-body">
+			</div>
+		</div>
+		<div class="modal-overlay"></div>
+	</div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"log":false,"model":{"jsonPath":"/live2dw/assets/haruto.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":true},"react":{"opacity":0.7}});</script></body>
+<script>
+!
+function() {
+    function n(n, e, t) {
+        return n.getAttribute(e) || t
+    }
+    function e(n) {
+        return document.getElementsByTagName(n)
+    }
+    function t() {
+        var t = e("script"),
+        o = t.length,
+        i = t[o - 1];
+        return {
+            l: o,
+            z: n(i, "zIndex", -1),     //置于主页面背后
+            o: n(i, "opacity", .5),     //线条透明度
+            c: n(i, "color", "0,0,0"),  //线条颜色
+            n: n(i, "count", 100)    //线条数量
+        }
+    }
+    function o() {
+        a = m.width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth,
+        c = m.height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
+    }
+    function i() {
+        r.clearRect(0, 0, a, c);
+        var n, e, t, o, m, l;
+        s.forEach(function(i, x) {
+            for (i.x += i.xa, i.y += i.ya, i.xa *= i.x > a || i.x < 0 ? -1 : 1, i.ya *= i.y > c || i.y < 0 ? -1 : 1, r.fillRect(i.x - .5, i.y - .5, 1, 1), e = x + 1; e < u.length; e++) n = u[e],
+            null !== n.x && null !== n.y && (o = i.x - n.x, m = i.y - n.y, l = o * o + m * m, l < n.max && (n === y && l >= n.max / 2 && (i.x -= .03 * o, i.y -= .03 * m), t = (n.max - l) / n.max, r.beginPath(), r.lineWidth = t / 2, r.strokeStyle = "rgba(" + d.c + "," + (t + .2) + ")", r.moveTo(i.x, i.y), r.lineTo(n.x, n.y), r.stroke()))
+        }),
+        x(i)
+    }
+    var a, c, u, m = document.createElement("canvas"),
+    d = t(),
+    l = "c_n" + d.l,
+    r = m.getContext("2d"),
+    x = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
+    function(n) {
+        window.setTimeout(n, 1e3 / 45)
+    },
+    w = Math.random,
+    y = {
+        x: null,
+        y: null,
+        max: 2e4
+    };
+    m.id = l,
+    m.style.cssText = "position:fixed;top:0;left:0;z-index:" + d.z + ";opacity:" + d.o,
+    e("body")[0].appendChild(m),
+    o(),
+    window.onresize = o,
+    window.onmousemove = function(n) {
+        n = n || window.event,
+        y.x = n.clientX,
+        y.y = n.clientY
+    },
+    window.onmouseout = function() {
+        y.x = null,
+        y.y = null
+    };
+    for (var s = [], f = 0; d.n > f; f++) {
+        var h = w() * a,
+        g = w() * c,
+        v = 2 * w() - 1,
+        p = 2 * w() - 1;
+        s.push({
+            x: h,
+            y: g,
+            xa: v,
+            ya: p,
+            max: 6e3
+        })
+    }
+    u = s.concat([y]),
+    setTimeout(function() {
+        i()
+    },
+    100)
+} ();
+</script>
+
+<script type='text/javascript' id='clustrmaps' src='//cdn.clustrmaps.com/map_v2.js?cl=ffffff&w=350&t=m&d=1NqKKNlM62oDkLYA7mQMmVg49mUH_Ib-6MkRgvd04o8&co=2d78ad&cmo=ffc253&cmn=ff5353&ct=ffffff'></script>
+
+</html>
