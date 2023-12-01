@@ -468,9 +468,9 @@
 <p>Git 是一个开源的<strong>分布式</strong>版本控制系统，用于敏捷高效地处理任何或小或大的项目。</p>
 <p>Git 工作区、暂存区和版本库、本地仓库的概念：</p>
 <ul>
-<li>**工作区：**电脑里能看见（非隐藏）的工作目录。</li>
-<li>**暂存区：**英文叫  <code>stage </code> 或  <code>index</code> ，<strong>暂存区域是一个文件，保存了下次将提交的文件列表信息</strong>。一般存放在  <code>.git</code> 目录下的 <code>index</code> 文件（.git/index）中，所以我们把暂存区有时也叫作索引（index）。</li>
-<li>**版本库：**工作区有一个隐藏目录 <code>.git</code> ，这个不算工作区，<strong>保存项目的元数据和对象数据库</strong>，用来跟踪管理仓库。</li>
+<li><strong>工作区：</strong> 电脑里能看见（非隐藏）的工作目录。</li>
+<li><strong>暂存区：</strong> 英文叫  <code>stage </code> 或  <code>index</code> ，<strong>暂存区域是一个文件，保存了下次将提交的文件列表信息</strong>。一般存放在  <code>.git</code> 目录下的 <code>index</code> 文件（.git/index）中，所以我们把暂存区有时也叫作索引（index）。</li>
+<li><strong>版本库：</strong> 工作区有一个隐藏目录 <code>.git</code> ，这个不算工作区，<strong>保存项目的元数据和对象数据库</strong>，用来跟踪管理仓库。</li>
 <li><strong>本地仓库：</strong> 本地仓库保存了对象被提交过的各个版本。<code>git commit</code> 后同步index的目录树到本地仓库，方便从下一步通过 <code>git push</code> 同步本地仓库与远程仓库。说明如下：
 <ul>
 <li>只有把修改提交到本地仓库，该修改才能在仓库中留下痕迹</li>
