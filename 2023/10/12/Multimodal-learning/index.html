@@ -450,13 +450,13 @@
 					
 						<span class="post-count">
 					📑Words:
-						<a href="">2.5k</a>
+						<a href="">3k</a>
 						</span>
 					
 					
 						<span class="post-count">
 					⏱️Time:
-						<a href="">10min</a>  
+						<a href="">12min</a>  
 						</span>
 					
                 </div>
@@ -531,13 +531,17 @@
 <p>##引入条件的几种方式</p>
 <ul>
 <li>
-<p>输入端Concatenation（Palette lmage-to-lage Diffusion Models）</p>
+<p>输入端 <code>Concatenation</code> ，将其作为UNet输入中的额外通道进行输入。当条件特征与图像特征形状相同时，例如分割蒙版、深度图或图像的模糊版本（在恢复/超分辨率模型的情况下）时，通常会使用这种方法。它也适用于其他类型的条件。例如，类标签被映射到嵌入向量，然后扩展到与输入图像相同的宽度和高度，以便将其作为额外通道输入。</p>
+<figure class="highlight python"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">ClassConditionedUnet</span>(nn.Module):</span><br><span class="line">  <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, num_classes=<span class="number">10</span>, class_emb_size=<span class="number">4</span></span>):</span><br><span class="line">    <span class="built_in">super</span>().__init__()</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># The embedding layer will map the class label to a vector of size class_emb_size</span></span><br><span class="line">    self.class_emb = nn.Embedding(num_classes, class_emb_size)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># Self.model is an unconditional UNet with extra input channels to accept the conditioning information (the class embedding)</span></span><br><span class="line">    self.model = UNet2DModel(</span><br><span class="line">        sample_size=<span class="number">28</span>,           <span class="comment"># the target image resolution</span></span><br><span class="line">        in_channels=<span class="number">1</span> + class_emb_size, <span class="comment"># Additional input channels for class cond.</span></span><br><span class="line">        out_channels=<span class="number">1</span>,           <span class="comment"># the number of output channels</span></span><br><span class="line">        layers_per_block=<span class="number">2</span>,       <span class="comment"># how many ResNet layers to use per UNet block</span></span><br><span class="line">        block_out_channels=(<span class="number">32</span>, <span class="number">64</span>, <span class="number">64</span>), </span><br><span class="line">        down_block_types=( </span><br><span class="line">            <span class="string">"DownBlock2D"</span>,        <span class="comment"># a regular ResNet downsampling block</span></span><br><span class="line">            <span class="string">"AttnDownBlock2D"</span>,    <span class="comment"># a ResNet downsampling block with spatial self-attention</span></span><br><span class="line">            <span class="string">"AttnDownBlock2D"</span>,</span><br><span class="line">        ), </span><br><span class="line">        up_block_types=(</span><br><span class="line">            <span class="string">"AttnUpBlock2D"</span>, </span><br><span class="line">            <span class="string">"AttnUpBlock2D"</span>,      <span class="comment"># a ResNet upsampling block with spatial self-attention</span></span><br><span class="line">            <span class="string">"UpBlock2D"</span>,          <span class="comment"># a regular ResNet upsampling block</span></span><br><span class="line">          ),</span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line">  <span class="comment"># Our forward method now takes the class labels as an additional argument</span></span><br><span class="line">  <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x, t, class_labels</span>):</span><br><span class="line">    <span class="comment"># Shape of x:</span></span><br><span class="line">    bs, ch, w, h = x.shape</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># class conditioning in right shape to add as additional input channels</span></span><br><span class="line">    class_cond = self.class_emb(class_labels) <span class="comment"># Map to embedding dimension</span></span><br><span class="line">    class_cond = class_cond.view(bs, class_cond.shape[<span class="number">1</span>], <span class="number">1</span>, <span class="number">1</span>).expand(bs, class_cond.shape[<span class="number">1</span>], w, h)</span><br><span class="line">    <span class="comment"># x is shape (bs, 1, 28, 28) and class_cond is now (bs, 4, 28, 28)</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># Net input is now x and class cond concatenated together along dimension 1</span></span><br><span class="line">    net_input = torch.cat((x, class_cond), <span class="number">1</span>) <span class="comment"># (bs, 5, 28, 28)</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># Feed this to the UNet alongside the timestep and return the prediction</span></span><br><span class="line">    <span class="keyword">return</span> self.model(net_input, t).sample <span class="comment"># (bs, 1, 28, 28)</span></span><br></pre></td></tr></tbody></table></figure>
 </li>
 <li>
-<p>网络中融入Cross atttention（LSD）</p>
+<p>创建嵌入后，将其投影到与 <code>UNet</code> 内部一层或多层输出通道数量相匹配的大小，然后将其添加到这些输出中。例如，每个 <code>Resnet</code> 块的输出都添加了一个投影的时间步条件嵌入以及Stable Diffusion 中图像条件的嵌入方式。</p>
 </li>
 <li>
-<p>ControlNet额外训练一个组件，不微调SD</p>
+<p>网络中融入 <code>Cross atttention</code> （LSD）。当条件以某些文本形式存在时，这是最有用的 - 该文本使用变换器模型映射到一系列嵌入，然后在UNet中使用交叉注意力层将此信息合并到去噪路径中。</p>
+</li>
+<li>
+<p><code>ControlNet</code> 额外训练一个组件，不微调 <code>SD</code></p>
 </li>
 </ul>
 <h2 id="生成模型的目标"><a class="markdownIt-Anchor" href="#生成模型的目标"></a> 生成模型的目标</h2>
@@ -670,7 +674,7 @@
             </div>
             <footer id="footer" class="footer">
     <div class="copyright">
-        <span>© CY | 2022 - 2023 😉 Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a>
+        <span>© CY | 2022 - 2024 😉 Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a>
 		|
 		<!-- 访客数量 -->
 		

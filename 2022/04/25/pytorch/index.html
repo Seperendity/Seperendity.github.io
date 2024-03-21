@@ -457,13 +457,13 @@
 					
 						<span class="post-count">
 					📑Words:
-						<a href="">3.4k</a>
+						<a href="">3.8k</a>
 						</span>
 					
 					
 						<span class="post-count">
 					⏱️Time:
-						<a href="">14min</a>  
+						<a href="">16min</a>  
 						</span>
 					
                 </div>
@@ -472,6 +472,14 @@
 
         <div class="post-content">
             <h1 id="1-module类"><a class="markdownIt-Anchor" href="#1-module类"></a> 1. Module类</h1>
+<blockquote>
+<p>Behind the scenes, PyTorch overrides the <code>__setattr__</code> function in <code>nn.Module</code> so that the submodules you define are properly registered as parameters of the model.</p>
+</blockquote>
+<figure class="highlight python"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">MyModule</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, n_in, nh, n_out</span>):</span><br><span class="line">        self._modules = {}</span><br><span class="line">        self.l1 = nn.Linear(n_in,nh)</span><br><span class="line">        self.l2 = nn.Linear(nh,n_out)</span><br><span class="line">	</span><br><span class="line">    <span class="comment"># 当设置属性值时会被调用</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__setattr__</span>(<span class="params">self,k,v</span>):</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> k.startswith(<span class="string">"_"</span>): </span><br><span class="line">            self._modules[k] = v</span><br><span class="line">        <span class="comment"># 重写了 __setattr__ 方法后，你会屏蔽掉 Python 默认的属性赋值机制。</span></span><br><span class="line">        <span class="comment"># 为了保持类的正常功能（比如能够添加新属性、修改现有属性等），你需要显式调用基类的                     __setattr__ 方法，以保证除了你的自定义操作外，正常的属性赋值也能够发生。</span></span><br><span class="line">        <span class="built_in">super</span>().__setattr__(k,v)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__repr__</span>(<span class="params">self</span>): </span><br><span class="line">        <span class="keyword">return</span> <span class="string">f'<span class="subst">{self._modules}</span>'</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">parameters</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">for</span> l <span class="keyword">in</span> self._modules.values(): </span><br><span class="line">            <span class="comment"># yield from: 用于从一个生成器中产生所有值,迭代一个对象的参数，并将它们一个接一个地返回</span></span><br><span class="line">            <span class="keyword">yield</span> <span class="keyword">from</span> l.parameters()</span><br></pre></td></tr></tbody></table></figure>
+<blockquote>
+<p>Registering modules</p>
+</blockquote>
+<figure class="highlight python"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">layers = [nn.Linear(m,nh), nn.ReLU(), nn.Linear(nh,<span class="number">10</span>)]</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Model</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, layers</span>):</span><br><span class="line">        <span class="built_in">super</span>().__init__()</span><br><span class="line">        self.layers = layers</span><br><span class="line">        <span class="keyword">for</span> i,l <span class="keyword">in</span> <span class="built_in">enumerate</span>(self.layers): </span><br><span class="line">            self.add_module(<span class="string">f'layer_<span class="subst">{i}</span>'</span>, l)</span><br><span class="line">	</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x</span>): </span><br><span class="line">        <span class="comment"># reduce() 至少需要两个参数：一个函数和一个可迭代对象,还可以接受第三个参数，即初始化器。</span></span><br><span class="line">        <span class="comment"># nn.ModuleList does this for us</span></span><br><span class="line">        <span class="keyword">return</span> reduce(<span class="keyword">lambda</span> val,layer: layer(val), self.layers, x)</span><br><span class="line"></span><br><span class="line">model = Model(layers)</span><br></pre></td></tr></tbody></table></figure>
 <ul>
 <li>module中的__getattr中有三个魔法函数，其有三个成员变量分别是<code>_parameters</code>、<code>_buffers</code>(统计量)和<code>_modules</code></li>
 </ul>
@@ -580,9 +588,17 @@
 <h1 id="5-einsum"><a class="markdownIt-Anchor" href="#5-einsum"></a> 5. einsum</h1>
 <p>基本规则：</p>
 <ul>
-<li>在不同输入之间重复出现的索引表示，把输入张量沿着该维度做乘法操作。如<code>"ik,kj-&gt;ij"</code>，<code>k</code> 在输入中重复出现，所以就是把 <code>a</code> 和 <code>b</code> 沿着<code> k</code> 这个维度作相乘操作</li>
-<li>只出现在一边的索引，表示中间计算结果需要在这个维度上求和</li>
-<li>等式 右边的索引顺序可以是任意的，比如上面的<code>"ik,kj-&gt;ij"</code>如果写成<code> "ik,kj-&gt;ji"</code>，那么就是返回输出结果的转置，用户只需要定义好索引的顺序。</li>
+<li>
+<p>在不同输入之间重复出现的索引表示，把输入张量沿着该维度做乘法操作。如<code>"ik,kj-&gt;ij"</code>，<code>k</code> 在输入中重复出现，所以就是把 <code>a</code> 和 <code>b</code> 沿着<code> k</code> 这个维度作相乘操作</p>
+<figure class="highlight python"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch </span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">a, b:</span></span><br><span class="line"><span class="string">(tensor([[6, 0, 5],</span></span><br><span class="line"><span class="string">         [6, 4, 8]]),</span></span><br><span class="line"><span class="string"> tensor([[6, 5, 2, 3, 1],</span></span><br><span class="line"><span class="string">         [4, 8, 1, 8, 5],</span></span><br><span class="line"><span class="string">         [0, 6, 7, 6, 7]]))</span></span><br><span class="line"><span class="string"> c: </span></span><br><span class="line"><span class="string"> tensor([[[36, 30, 12, 18,  6],</span></span><br><span class="line"><span class="string">         [ 0,  0,  0,  0,  0],</span></span><br><span class="line"><span class="string">         [ 0, 30, 35, 30, 35]],</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        [[36, 30, 12, 18,  6],</span></span><br><span class="line"><span class="string">         [16, 32,  4, 32, 20],</span></span><br><span class="line"><span class="string">         [ 0, 48, 56, 48, 56]]])</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line">a= torch.randint(low=<span class="number">0</span>, high=<span class="number">10</span>, size=(<span class="number">2</span>, <span class="number">3</span>))</span><br><span class="line">b= torch.randint(low=<span class="number">0</span>, high=<span class="number">10</span>, size=(<span class="number">3</span>, <span class="number">5</span>))</span><br><span class="line">c = torch.einsum(<span class="string">'ik,kj-&gt;ikj'</span>, a, b)</span><br></pre></td></tr></tbody></table></figure>
+</li>
+<li>
+<p>只出现在一边的索引，表示中间计算结果需要在这个维度上求和</p>
+<figure class="highlight python"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">d: tensor([[ 36,  60,  47,  48,  41],</span></span><br><span class="line"><span class="string">        [ 52, 110,  72,  98,  82]])</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line">d = torch.einsum(<span class="string">'ik,kj-&gt;ij'</span>, a, b)</span><br></pre></td></tr></tbody></table></figure>
+</li>
+<li>
+<p>等式 右边的索引顺序可以是任意的，比如上面的<code>"ik,kj-&gt;ij"</code>如果写成<code> "ik,kj-&gt;ji"</code>，那么就是返回输出结果的转置，用户只需要定义好索引的顺序。</p>
+</li>
 </ul>
 <p>特殊规则：</p>
 <ul>
@@ -678,7 +694,7 @@
             </div>
             <footer id="footer" class="footer">
     <div class="copyright">
-        <span>© CY | 2022 - 2023 😉 Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a>
+        <span>© CY | 2022 - 2024 😉 Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a>
 		|
 		<!-- 访客数量 -->
 		
