@@ -24,7 +24,7 @@
 
     <!-- stylesheets list from _config.yml -->
     
-    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/style.css?v=20260521-katex">
     
     <link rel="stylesheet" href="/../fonts/iconfont2/iconfont.css">
     
@@ -33,6 +33,17 @@
     <link rel="stylesheet" href="/../fonts/iconfont4/iconfont.css">
     
 
+<style>
+    .katex .katex-mathml {
+        position: absolute !important;
+        clip: rect(1px, 1px, 1px, 1px) !important;
+        padding: 0 !important;
+        border: 0 !important;
+        height: 1px !important;
+        width: 1px !important;
+        overflow: hidden !important;
+    }
+</style>
 
 
     <!-- scripts list from _config.yml -->
@@ -45,11 +56,6 @@
     
 
 
-
-    
-    
-        
-    
 
 
 <!-- 搜索的部分 -->
@@ -252,6 +258,7 @@
         search("#u-search-modal-form .form-input", ".u-search-modal-form", true)
     })
 </script>
+
 
 <meta name="generator" content="Hexo 6.1.0">
 <style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
@@ -457,13 +464,13 @@
 					
 						<span class="post-count">
 					📑Words:
-						<a href="">4.1k</a>
+						<a href="">4.4k</a>
 						</span>
 					
 					
 						<span class="post-count">
 					⏱️Time:
-						<a href="">15min</a>  
+						<a href="">16min</a>  
 						</span>
 					
                 </div>
@@ -509,18 +516,30 @@
 <p>​	在外界视觉刺激下，视觉皮层中神经细胞激活，血管耗氧量增加，脑血流速率增长，由于脑增长的速率远大于脑氧代谢率，导致神经激活处氧含量的供应远大于消耗，使得脱氧血红蛋白比例降低。由于血红蛋白是否含氧在磁性上稍有差别，含血红蛋白是抗磁性的，而脱血红蛋白是顺磁性的，在磁场中会引起自旋散相，导致磁共振信号在含氧的血液中显示高信号，而在脱氧的血液中显示低信号。神经活动引起的含氧血红蛋白比例升高，使得这种血氧水平依赖(Blood Oxygenation Level Dependent,BOLD) 信号增加。因此， <code>BOLD</code> 信号的改变一定程度上可以反映视觉皮层区域神经活动的情况，MRI是目前了解大脑功能最好的工具之一。相比神经活动，血流增加大约存在5至8秒的滞后，因此， <code>MRI</code> 的时间分辨率不高，导致fMRI实验数据的采集需要耗费较长的时间，制约了 <code>fMRI</code> 视觉信息解析研究的数据规模。</p>
 <p>​	fMRI采集大脑的BOLD信号，通过三维重构等预处理过程，可以得到一系列三维大脑图像，每个三维图像都包含大量体素。体素是三维空间中成像的基本单元，与二维图像中的像素对应，每个体素的时间信号就是该体素对应视觉皮层空间区域内神经元群体活动引起的BOLD信号。当被试观看图像刺激时，相应的视觉皮层MRI体素会随时间发生规律性的变化。一个体素大约包含10个神经细胞，体素的BOLD信号是大量神经细胞的血液动力学响应的综合结果，反映了该区域内大量神经活动的综合情况。[^1]</p>
 <h2 id="14-图像刺激下的一般范式"><a class="markdownIt-Anchor" href="#14-图像刺激下的一般范式"></a> 1.4 图像刺激下的一般范式</h2>
-<p>​	作为视觉刺激的图像数据集通常从公开自然图像数据库中选择，为了后续计算模型的训练和验证，通常把数据集划分为训练集和测试集。然后，通常按照随机选择的顺序，使用刺激呈现软件如 <code>E-Prime</code>  等，根据预先设定的呈现时间、呈现频率、休息间隙等播放给被试观看。通常一次图像呈现和数据采集被称作一次试验(trial)，如格兰特团队使用 200毫秒的频率和灰色背景交替呈现，持续 1 秒，然后呈现 3 秒的灰色背景，总共 4 秒时间，接着进行下一幅图像刺激的呈现试验。若干图像刺激的不断呈现通常作为一次扫描(run)，多次扫描组成一次实验，通常，整个数据库图像的呈现又分成若干次实验。另外，作为测试集的图像通常被重复多次呈现，用于提高 BOLD 信号的信噪比。</p>
+<p>​	分类：作为视觉刺激的图像数据集通常从公开自然图像数据库中选择，为了后续计算模型的训练和验证，通常把数据集划分为训练集和测试集。然后，通常按照随机选择的顺序，使用刺激呈现软件如 <code>E-Prime</code>  等，根据预先设定的呈现时间、呈现频率、休息间隙等播放给被试观看。通常一次图像呈现和数据采集被称作一次试验(trial)，如格兰特团队使用 200毫秒的频率和灰色背景交替呈现，持续 1 秒，然后呈现 3 秒的灰色背景，总共 4 秒时间，接着进行下一幅图像刺激的呈现试验。若干图像刺激的不断呈现通常作为一次扫描(run)，多次扫描组成一次实验，通常，整个数据库图像的呈现又分成若干次实验。另外，作为测试集的图像通常被重复多次呈现，用于提高 BOLD 信号的信噪比。</p>
+<blockquote>
+<p>RoBrain: Towards Robust Brain-to-Image Reconstruction via Cross-Domain Contrastive Learning(重构)</p>
+</blockquote>
 <h1 id="2-数据预处理"><a class="markdownIt-Anchor" href="#2-数据预处理"></a> 2. 数据预处理</h1>
-<p>​	在将数据输入到模型之前，需要进行一系列预处理步骤，以提高数据质量并减少噪声的影响。对于fMRI数据，常见的预处理步骤包括：</p>
+<p>​	fMRI数据预处理的流程通常包括多个步骤，旨在清洗和标准化数据，以便进行后续的统计分析。预处理的目的是减少非神经源性变异的影响，提高信号的质量，并确保数据的解剖位置准确。以下是fMRI数据预处理的一般流程，以及数据格式的变化：</p>
 <ul>
 <li>
-<p><strong>Fuse and Conform</strong> : fMRI实验中通常需要多次扫描，包括功能扫描和结构扫描，有时还包括不同的条件和重复实验。不同的扫描可能有不同的分辨率和方向。为了能够将这些不同的数据集准确地叠加在一起，需要先将它们转换成统一的标准。这一步也是使数据准备进一步分析（如脑区分割、功能定位等）的基础。</p>
+<p><strong>格式和结构化</strong>：首先，需要确保数据符合Brain Imaging Data Structure (BIDS)标准，这有助于自动化预处理流程，并确保数据的一致性和可追溯性。</p>
 </li>
 <li>
-<p><strong>Skull-stripping</strong> : 去除头壳</p>
+<p><strong>头动校正（Head-Motion Correction, HMC）</strong>：通过估计刚体运动参数来校正参与者在扫描过程中的头部运动。这通常涉及到对BOLD时间序列应用变换矩阵，以最小化时间步骤之间的运动。</p>
 </li>
 <li>
-<p><strong>Spatial Normalization</strong>：如果尚未完成，将所有被试的脑图像变换到标准空间（如 <code>MNI</code> 空间）。</p>
+<p><strong>切片时间校正（Slice-Timing Correction, STC）</strong>：如果BOLD数据是分片采集的，需要校正由于不同时间点采集的切片而产生的信号差异。</p>
+</li>
+<li>
+<p><strong>强度非均匀性校正（Intensity Nonuniformity Correction, INU）</strong>：使用算法如N4BiasFieldCorrection来校正图像中的强度非均匀性，这是由于磁共振成像中的磁场不均匀性引起的。</p>
+</li>
+<li>
+<p><strong>脑提取（Brain Extraction）</strong>：使用如ANTs或FreeSurfer等工具从原始T1加权图像中提取大脑区域，以便专注于大脑组织的分析。</p>
+</li>
+<li>
+<p><strong>Spatial Normalization</strong>：将结构像（如T1加权像）和功能像（BOLD数据）对齐到一个标准大脑模板（如MNI空间），以便进行跨个体比较。</p>
 <blockquote>
 <p>标准空间，如蒙特利尔神经学研究所（Montreal Neurological Institute, MNI）空间，是神经影像学中用于数据分析和比较的一种共同参考框架。在神经科学研究中，研究者经常需要比较来自不同个体的大脑结构或功能图像。然而，由于每个人的大脑大小、形状和定位都有所不同，直接比较这些图像会非常困难。为了解决这个问题，科学家们开发了标准空间，即将个体的大脑图像变换到一个共同的参考框架内，以便进行有效的比较和分析。</p>
 <p>MNI空间是最广泛使用的标准空间之一，由蒙特利尔神经学研究所创建。它基于多个健康成年人大脑的平均形状和大小，提供了一个标准化的3D参考框架。MNI空间允许研究者将来自不同个体的大脑成像数据对齐到相同的三维坐标系统中，从而使比较和群体分析成为可能。</p>
@@ -533,7 +552,13 @@
 </blockquote>
 </li>
 <li>
-<p><strong>Brain Tissue Segmentation</strong> : 将脑成像数据中的不同组织类型（如灰质、白质和脑脊液）区分开的过程。这通常是通过分析MRI图像的强度值来实现的，因为不同的脑组织类型在MRI扫描中呈现不同的信号强度。</p>
+<p><strong>Brain Tissue Segmentation</strong> : 在T1加权像上进行组织分类，将脑成像数据中的不同组织类型（如灰质、白质和脑脊液）区分开。这通常是通过分析MRI图像的强度值来实现的，因为不同的脑组织类型在MRI扫描中呈现不同的信号强度。</p>
+</li>
+<li>
+<p><strong>BOLD信号的重采样（Resampling of BOLD Series）</strong>：将BOLD时间序列重采样到不同的空间（如原始空间、T1加权空间或标准模板空间）。</p>
+</li>
+<li>
+<p><strong>视觉报告（Visual Reports）</strong>：生成详细的视觉报告，以便于研究人员评估预处理步骤的质量，并确保结果的透明度。</p>
 </li>
 </ul>
 <h1 id="3-获取特定脑区数据"><a class="markdownIt-Anchor" href="#3-获取特定脑区数据"></a> 3. 获取特定脑区数据</h1>
@@ -677,7 +702,7 @@
             </div>
             <footer id="footer" class="footer">
     <div class="copyright">
-        <span>© CY | 2022 - 2024 😉 Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a>
+        <span>© CY | 2022 - 2026 😉 Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a>
 		|
 		<!-- 访客数量 -->
 		

@@ -2,3 +2,23 @@
   max-width: 780px;
   margin: auto;
 }
+.MathJax_Preview {
+  display: none !important;
+}
+.MJX_Assistive_MathML,
+.MathJax .MJX_Assistive_MathML {
+  display: none !important;
+  visibility: hidden !important;
+}
+script[type^="math/tex"] {
+  display: none !important;
+}
+.katex .katex-mathml {
+  position: absolute !important;
+  clip: rect(1px, 1px, 1px, 1px) !important;
+  padding: 0 !important;
+  border: 0 !important;
+  height: 1px !important;
+  width: 1px !important;
+  overflow: hidden !important;
+}
